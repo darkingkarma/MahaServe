@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MahaServe | Barangay Mahayahay</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #183153;
+        }
+
+        nav {
+            background: #123c69;
+            color: white;
+            padding: 20px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav h2 {
+            font-size: 24px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #123c69, #246b8e);
+            color: white;
+            padding: 85px 8%;
+        }
+
+        .hero h1 {
+            font-size: clamp(32px, 5vw, 48px);
+            max-width: 650px;
+            margin-bottom: 18px;
+        }
+
+        .hero p {
+            font-size: 17px;
+            line-height: 1.7;
+            max-width: 600px;
+            margin-bottom: 28px;
+        }
+
+        .button {
+            display: inline-block;
+            background: #f6c453;
+            color: #183153;
+            padding: 14px 22px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        main {
+            padding: 55px 8%;
+        }
+
+        main h2 {
+            margin-bottom: 12px;
+        }
+
+        .intro {
+            color: #64748b;
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+
+        .services {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 22px;
+        }
+
+        .card {
+            background: white;
+            padding: 26px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .card .symbol {
+            font-size: 30px;
+            margin-bottom: 16px;
+        }
+
+        .card h3 {
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        @media (max-width: 520px) {
+            nav {
+                align-items: flex-start;
+                gap: 12px;
+                flex-direction: column;
+            }
+
+            nav a {
+                margin-left: 0;
+                margin-right: 14px;
+            }
+
+            .hero {
+                padding-top: 55px;
+                padding-bottom: 55px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <h2>MahaServe</h2>
+        <div>
+            <a href="/">Home</a>
+            <a href="#services">Services</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Barangay services, made simpler.</h1>
+        <p>
+            Welcome to MahaServe, the online document request
+            system for Barangay Mahayahay. Submit requests
+            and track their progress conveniently online.
+        </p>
+        <a class="button" href="#services">Explore Documents →</a>
+    </section>
+
+    <main id="services">
+        <h2>Available Document Services</h2>
+        <p class="intro">
+            Explore the documents you may request through
+            Barangay Mahayahay.
+        </p>
+
+        <div class="services">
+            <div class="card">
+                <div class="symbol">📄</div>
+                <h3>Barangay Clearance</h3>
+                <p>For employment and other authorized purposes,
+                subject to barangay requirements.</p>
+            </div>
+
+            <div class="card">
+                <div class="symbol">🏠</div>
+                <h3>Certificate of Residency</h3>
+                <p>For purposes requiring proof of residence,
+                subject to verification.</p>
+            </div>
+
+            <div class="card">
+                <div class="symbol">📋</div>
+                <h3>Certificate of Indigency</h3>
+                <p>For eligible residents who need certification
+                for an authorized purpose.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2026 MahaServe | Barangay Mahayahay
+        <br><br>
+        Academic project prototype
+    </footer>
+
+</body>
+</html>
