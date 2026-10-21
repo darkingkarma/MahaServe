@@ -1,6 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import IntegrityError
 from django.contrib.admin.views.decorators import staff_member_required
 from .models import DocumentType, DocumentRequest
@@ -52,6 +56,41 @@ def register(request):
 
     return render(request, "documents/register.html")
 
+
+def login(request):
+    if request.user.is_authenticated:
+        if request.user.is_staff:
+            return redirect("admin_dashboard")
+        return redirect("landing")
+
+    if request.method == "POST":
+        username = request.POST.get("username", "").strip()
+        password = request.POST.get("password", "")
+
+        user = authenticate(
+            request,
+            username=username,
+            password=password
+        )
+
+        if user is not None:
+            auth_login(request, user)
+
+            if user.is_staff:
+                return redirect("admin_dashboard")
+
+            return redirect("landing")
+
+        messages.error(request, "Invalid username or password.")
+
+    return render(request, "documents/login.html")
+
+
+def logout(request):
+    if request.method == "POST":
+        auth_logout(request)
+
+    return redirect("landing")
 
 @staff_member_required(login_url="/admin/login/")
 def admin_dashboard(request):
