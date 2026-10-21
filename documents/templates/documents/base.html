@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{% block title %}MahaServe{% endblock %}</title>
+    <title>{% block title %}MahaServe Staff{% endblock %}</title>
 
     <style>
         * {
@@ -18,7 +18,7 @@
             color: #172554;
         }
 
-        /* SIDEBAR */
+        /* FIXED SIDEBAR */
         .sidebar {
             position: fixed;
             top: 0;
@@ -29,6 +29,7 @@
             color: white;
             padding: 25px 15px;
             overflow-y: auto;
+            z-index: 100;
         }
 
         .brand {
@@ -62,7 +63,7 @@
             border-radius: 6px;
             color: #e2e8f0;
             text-decoration: none;
-            transition: 0.2s;
+            transition: background 0.2s, color 0.2s;
         }
 
         .sidebar a:hover {
@@ -102,14 +103,21 @@
             min-height: 100vh;
         }
 
+        /* STICKY TOP NAVIGATION BAR */
         .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 99;
+
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 15px;
+
             padding: 20px 30px;
             background: white;
             border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
         }
 
         .topbar h3 {
@@ -119,13 +127,14 @@
         .user-info {
             font-size: 14px;
             color: #64748b;
+            overflow-wrap: anywhere;
         }
 
         .content {
             padding: 30px;
         }
 
-        /* SHARED DJANGO MESSAGES */
+        /* DJANGO MESSAGES */
         .messages {
             margin-bottom: 20px;
         }
@@ -180,7 +189,7 @@
             color: #172554;
         }
 
-        /* MOBILE */
+        /* RESPONSIVE LAYOUT */
         @media (max-width: 768px) {
             .sidebar {
                 width: 200px;
@@ -227,12 +236,33 @@
                 font-size: 12px;
             }
 
+            .logout-btn {
+                padding: 12px 5px;
+                text-align: center;
+                font-size: 12px;
+            }
+
             .main {
                 margin-left: 65px;
             }
 
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 8px;
+                padding: 15px 10px;
+            }
+
+            .topbar h3 {
+                font-size: 17px;
+            }
+
             .user-info {
                 font-size: 11px;
+            }
+
+            .content {
+                padding: 15px 10px;
             }
         }
     </style>
@@ -242,7 +272,7 @@
 
 <body>
 
-    <!-- SIDEBAR -->
+    <!-- STAFF SIDEBAR -->
     <aside class="sidebar">
         <div class="brand">
             <h2>MahaServe</h2>
@@ -251,22 +281,32 @@
 
         <p class="nav-label">Main Menu</p>
 
+        <!-- Dashboard -->
         <a href="{% url 'admin_dashboard' %}"
            class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
             📊 <span class="nav-text">Dashboard</span>
         </a>
 
+        <!-- Manage Documents -->
         <a href="{% url 'manage_documents' %}"
            class="{% if request.resolver_match.url_name == 'manage_documents' or request.resolver_match.url_name == 'add_document' or request.resolver_match.url_name == 'edit_document' %}active{% endif %}">
             📄 <span class="nav-text">Manage Documents</span>
         </a>
 
+        <!-- Manage Requests -->
+        <a href="{% url 'manage_requests' %}"
+           class="{% if request.resolver_match.url_name == 'manage_requests' or request.resolver_match.url_name == 'request_details' or request.resolver_match.url_name == 'update_request' %}active{% endif %}">
+            📋 <span class="nav-text">Manage Requests</span>
+        </a>
+
         <p class="nav-label">Account</p>
 
+        <!-- Public Website -->
         <a href="{% url 'landing' %}">
             🏠 <span class="nav-text">View Website</span>
         </a>
 
+        <!-- Logout -->
         <form method="POST" action="{% url 'logout' %}">
             {% csrf_token %}
             <button type="submit" class="logout-btn">
@@ -278,11 +318,12 @@
     <!-- MAIN AREA -->
     <div class="main">
 
+        <!-- STICKY TOP BAR -->
         <header class="topbar">
             <h3>{% block page_heading %}Staff Dashboard{% endblock %}</h3>
 
             <div class="user-info">
-                {{ request.user.username }}
+                Logged in as: {{ request.user.username }}
             </div>
         </header>
 
@@ -299,7 +340,7 @@
                 </div>
             {% endif %}
 
-            <!-- PAGE CONTENT GOES HERE -->
+            <!-- PAGE CONTENT -->
             {% block content %}
             {% endblock %}
 

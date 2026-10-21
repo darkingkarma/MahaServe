@@ -9,7 +9,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.db import IntegrityError
 
 from .models import DocumentType, DocumentRequest
-
+import resend
+from django.conf import settings
 
 # ==========================================
 # LANDING PAGE
@@ -251,7 +252,7 @@ def request_details(request, request_id):
         "documents/request_details.html",
         context
     )
-    
+
 @staff_member_required(login_url="/login/")
 def manage_requests(request):
     requests_list = DocumentRequest.objects.select_related(
@@ -271,14 +272,18 @@ def manage_requests(request):
     )
 
 
+
 @staff_member_required(login_url="/login/")
 def update_request(request, request_id):
     if request.method != "POST":
         return redirect("manage_requests")
 
     document_request = get_object_or_404(
-        DocumentRequest,
-        id=request_id
+        DocumentRequest.objects.select_related(
+            "resident",
+            "document_type",
+        ),
+        id=request_id,
     )
 
     new_status = request.POST.get("status", "").strip()
@@ -288,18 +293,55 @@ def update_request(request, request_id):
 
     if new_status not in valid_statuses:
         messages.error(request, "Invalid request status.")
-        return redirect("manage_requests")
+        return redirect("request_details", request_id=request_id)
+
+    old_status = document_request.status
 
     document_request.status = new_status
     document_request.remarks = remarks
-    document_request.save(update_fields=["status", "remarks", "updated_at"])
-
-    messages.success(
-        request,
-        f"Request #{document_request.id} updated successfully."
+    document_request.save(
+        update_fields=["status", "remarks", "updated_at"]
     )
 
+    messages.success(request, "Request updated successfully.")
+
+    # Send an email only when the status actually changes.
+    if old_status != new_status:
+        recipient_email = document_request.resident.email
+
+        if settings.RESEND_API_KEY and recipient_email:
+            try:
+                resend.api_key = settings.RESEND_API_KEY
+
+                resend.Emails.send({
+                    "from": "onboarding@resend.dev",
+                    "to": [recipient_email],
+                    "subject": (
+                        f"MahaServe: Your {document_request.document_type.name} "
+                        "request has been updated"
+                    ),
+                    "text": (
+                        f"Hello {document_request.resident.username},\n\n"
+                        f"Your request for "
+                        f"{document_request.document_type.name} has been updated.\n\n"
+                        f"New status: {valid_statuses[new_status]}\n"
+                        f"Staff remarks: {remarks or 'No additional remarks.'}\n\n"
+                        "Please log in to MahaServe to track your request.\n\n"
+                        "Thank you,\nMahaServe"
+                    ),
+                })
+
+            except Exception as e:
+                print("RESEND EMAIL ERROR:", repr(e))
+
+                messages.warning(
+                    request,
+                    "The request was updated, but the email notification "
+                    "could not be sent. Check the terminal for details.",
+                )
+
     return redirect("manage_requests")
+
 
 # ==========================================
 # DOCUMENT MANAGEMENT - STAFF CRUD
