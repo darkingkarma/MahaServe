@@ -7,6 +7,7 @@ class DocumentType(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     fee = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    image = models.URLField(max_length=500, blank=True)
     is_available = models.BooleanField(default=True)
 
     def __str__(self):

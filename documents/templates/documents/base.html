@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}MahaServe{% endblock %}</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #172554;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100vh;
+            background: #172554;
+            color: white;
+            padding: 25px 15px;
+            overflow-y: auto;
+        }
+
+        .brand {
+            padding: 0 12px 25px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .brand h2 {
+            margin: 0 0 8px;
+            color: #facc15;
+        }
+
+        .brand p {
+            margin: 0;
+            font-size: 12px;
+            color: #cbd5e1;
+        }
+
+        .nav-label {
+            margin: 25px 12px 10px;
+            font-size: 11px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 12px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            color: #e2e8f0;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: #334155;
+            color: #facc15;
+        }
+
+        .sidebar a.active {
+            background: #facc15;
+            color: #172554;
+            font-weight: bold;
+        }
+
+        .sidebar form {
+            margin-top: 10px;
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            background: #991b1b;
+            color: white;
+            text-align: left;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background: #b91c1c;
+        }
+
+        /* MAIN CONTENT */
+        .main {
+            margin-left: 250px;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 20px 30px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .topbar h3 {
+            margin: 0;
+        }
+
+        .user-info {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        /* SHARED DJANGO MESSAGES */
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .message.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .message.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .message.info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* SHARED BUTTONS */
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            background: #172554;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-yellow {
+            background: #facc15;
+            color: #172554;
+        }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main {
+                margin-left: 200px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .topbar {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .sidebar {
+                width: 65px;
+                padding: 20px 8px;
+            }
+
+            .brand {
+                padding: 0 0 15px;
+                text-align: center;
+            }
+
+            .brand h2 {
+                font-size: 11px;
+                overflow-wrap: anywhere;
+            }
+
+            .brand p,
+            .nav-label,
+            .sidebar .nav-text {
+                display: none;
+            }
+
+            .sidebar a {
+                padding: 12px 5px;
+                text-align: center;
+                font-size: 12px;
+            }
+
+            .main {
+                margin-left: 65px;
+            }
+
+            .user-info {
+                font-size: 11px;
+            }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="brand">
+            <h2>MahaServe</h2>
+            <p>Barangay Mahayahay</p>
+        </div>
+
+        <p class="nav-label">Main Menu</p>
+
+        <a href="{% url 'admin_dashboard' %}"
+           class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+            📊 <span class="nav-text">Dashboard</span>
+        </a>
+
+        <a href="{% url 'manage_documents' %}"
+           class="{% if request.resolver_match.url_name == 'manage_documents' or request.resolver_match.url_name == 'add_document' or request.resolver_match.url_name == 'edit_document' %}active{% endif %}">
+            📄 <span class="nav-text">Manage Documents</span>
+        </a>
+
+        <p class="nav-label">Account</p>
+
+        <a href="{% url 'landing' %}">
+            🏠 <span class="nav-text">View Website</span>
+        </a>
+
+        <form method="POST" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">
+                🚪 <span class="nav-text">Logout</span>
+            </button>
+        </form>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <div class="main">
+
+        <header class="topbar">
+            <h3>{% block page_heading %}Staff Dashboard{% endblock %}</h3>
+
+            <div class="user-info">
+                {{ request.user.username }}
+            </div>
+        </header>
+
+        <main class="content">
+
+            <!-- SHARED DJANGO MESSAGES -->
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="message {{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- PAGE CONTENT GOES HERE -->
+            {% block content %}
+            {% endblock %}
+
+        </main>
+    </div>
+
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>

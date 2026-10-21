@@ -1,0 +1,180 @@
+{% extends "documents/base.html" %}
+
+{% block title %}Manage Documents | MahaServe{% endblock %}
+
+{% block page_heading %}Manage Documents{% endblock %}
+
+{% block content %}
+
+<style>
+    .page-intro {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .page-intro h1 {
+        margin: 0 0 8px;
+    }
+
+    .page-intro p {
+        margin: 0;
+        color: #64748b;
+    }
+
+    .table-panel {
+        background: white;
+        padding: 22px;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px #17233c0b;
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        min-width: 700px;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 14px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+    }
+
+    th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .availability {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .available {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .unavailable {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .actions form {
+        margin: 0;
+    }
+
+    .btn-danger {
+        background: #b91c1c;
+        color: white;
+    }
+
+    .empty {
+        padding: 30px;
+        text-align: center;
+        color: #64748b;
+    }
+</style>
+
+<div class="page-intro">
+    <div>
+        <h1>Document Types</h1>
+        <p>Create, update, and control which documents residents can request.</p>
+    </div>
+
+    <a href="{% url 'add_document' %}" class="btn btn-yellow">
+        + Add Document
+    </a>
+</div>
+
+<div class="table-panel">
+    <table>
+        <thead>
+            <tr>
+                <th>Document Name</th>
+                <th>Description</th>
+                <th>Fee</th>
+                <th>Availability</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for document in document_types %}
+                <tr>
+                    <td>{{ document.name }}</td>
+
+                    <td>
+                        {{ document.description|default:"No description" }}
+                    </td>
+
+                    <td>₱{{ document.fee|floatformat:2 }}</td>
+
+                    <td>
+                        {% if document.is_available %}
+                            <span class="availability available">
+                                Available
+                            </span>
+                        {% else %}
+                            <span class="availability unavailable">
+                                Unavailable
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <div class="actions">
+                            <a
+                                href="{% url 'edit_document' document.id %}"
+                                class="btn"
+                            >
+                                Edit
+                            </a>
+
+                            <form
+                                method="POST"
+                                action="{% url 'toggle_document_availability' document.id %}"
+                            >
+                                {% csrf_token %}
+
+                                <button
+                                    type="submit"
+                                    class="btn {% if document.is_available %}btn-danger{% else %}btn-yellow{% endif %}"
+                                >
+                                    {% if document.is_available %}
+                                        Deactivate
+                                    {% else %}
+                                        Activate
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="empty">
+                        No document types found. Add your first document type.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

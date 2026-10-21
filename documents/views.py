@@ -1,5 +1,4 @@
-
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
@@ -206,3 +205,119 @@ def admin_dashboard(request):
         "documents/admin_dashboard.html",
         context,
     )
+
+
+# ==========================================
+# DOCUMENT MANAGEMENT - STAFF CRUD
+# ==========================================
+
+@staff_member_required(login_url="/login/")
+def manage_documents(request):
+    document_types = DocumentType.objects.all().order_by("name")
+
+    return render(
+        request,
+        "documents/manage_documents.html",
+        {
+            "document_types": document_types,
+        },
+    )
+
+
+@staff_member_required(login_url="/login/")
+def add_document(request):
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        description = request.POST.get("description", "").strip()
+        fee = request.POST.get("fee", "").strip()
+
+        if not name or not fee:
+            messages.error(request, "Name and fee are required.")
+
+        elif DocumentType.objects.filter(name__iexact=name).exists():
+            messages.error(request, "This document type already exists.")
+
+        else:
+            try:
+                from decimal import Decimal, InvalidOperation
+
+                parsed_fee = Decimal(fee)
+
+                if not parsed_fee.is_finite() or parsed_fee < 0:
+                    raise InvalidOperation
+
+                DocumentType.objects.create(
+                    name=name,
+                    description=description,
+                    fee=parsed_fee,
+                    is_available=True,
+                )
+
+                messages.success(request, "Document type added successfully!")
+                return redirect("manage_documents")
+
+            except (InvalidOperation, ValueError):
+                messages.error(request, "Please enter a valid, non-negative fee.")
+
+    return render(request, "documents/add_document.html")
+
+
+@staff_member_required(login_url="/login/")
+def edit_document(request, document_id):
+    document = get_object_or_404(DocumentType, id=document_id)
+
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        description = request.POST.get("description", "").strip()
+        fee = request.POST.get("fee", "").strip()
+
+        if not name or not fee:
+            messages.error(request, "Name and fee are required.")
+
+        elif DocumentType.objects.filter(
+            name__iexact=name
+        ).exclude(id=document.id).exists():
+            messages.error(request, "Another document type has this name.")
+
+        else:
+            try:
+                from decimal import Decimal, InvalidOperation
+
+                parsed_fee = Decimal(fee)
+
+                if not parsed_fee.is_finite() or parsed_fee < 0:
+                    raise InvalidOperation
+
+                document.name = name
+                document.description = description
+                document.fee = parsed_fee
+                document.save()
+
+                messages.success(request, "Document type updated successfully!")
+                return redirect("manage_documents")
+
+            except (InvalidOperation, ValueError):
+                messages.error(request, "Please enter a valid, non-negative fee.")
+
+    return render(
+        request,
+        "documents/edit_document.html",
+        {"document": document},
+    )
+
+
+@staff_member_required(login_url="/login/")
+def toggle_document_availability(request, document_id):
+    if request.method != "POST":
+        return redirect("manage_documents")
+
+    document = get_object_or_404(DocumentType, id=document_id)
+    document.is_available = not document.is_available
+    document.save(update_fields=["is_available"])
+
+    messages.success(
+        request,
+        f"{document.name} availability updated successfully.",
+    )
+
+    return redirect("manage_documents")
