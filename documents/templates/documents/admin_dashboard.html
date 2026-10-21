@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MahaServe | Admin Dashboard</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            color: #17233c;
+        }
+        header {
+            background: #14284b;
+            color: white;
+            padding: 22px 6%;
+        }
+        header h2 { margin: 0 0 6px; }
+        header p { margin: 0; color: #d4deef; }
+        main { padding: 30px 6%; }
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .top a {
+            background: #f4c542;
+            color: #14284b;
+            padding: 11px 16px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 18px;
+            margin: 26px 0;
+        }
+        .card, .panel {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #17233c0b;
+        }
+        .card p { color: #65718a; margin: 0 0 12px; }
+        .card h2 { margin: 0; font-size: 30px; }
+        .panel { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #e8ebf1;
+        }
+        th { color: #65718a; font-size: 13px; }
+        .status { text-transform: capitalize; }
+        @media (max-width: 600px) {
+            main { padding: 20px 4%; }
+            header { padding: 20px 4%; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>MahaServe</h2>
+        <p>Barangay Mahayahay · Administration Portal</p>
+    </header>
+
+    <main>
+        <div class="top">
+            <div>
+                <h1>Admin Dashboard</h1>
+                <p>Overview of barangay document requests.</p>
+            </div>
+            <a href="/">View Landing Page</a>
+        </div>
+
+        <section class="stats">
+            <div class="card">
+                <p>Total Requests</p>
+                <h2>{{ total_requests }}</h2>
+            </div>
+            <div class="card">
+                <p>Pending Requests</p>
+                <h2>{{ pending_requests }}</h2>
+            </div>
+            <div class="card">
+                <p>Approved Requests</p>
+                <h2>{{ approved_requests }}</h2>
+            </div>
+            <div class="card">
+                <p>Released Documents</p>
+                <h2>{{ released_requests }}</h2>
+            </div>
+            <div class="card">
+                <p>Residents with Requests</p>
+                <h2>{{ total_residents }}</h2>
+            </div>
+            <div class="card">
+                <p>Document Types</p>
+                <h2>{{ total_document_types }}</h2>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>Recent Requests</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Resident</th>
+                        <th>Document</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in recent_requests %}
+                    <tr>
+                        <td>{{ item.resident.username }}</td>
+                        <td>{{ item.document_type.name }}</td>
+                        <td class="status">{{ item.get_status_display }}</td>
+                        <td>{{ item.submitted_at|date:"M d, Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">No document requests yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+</html>
