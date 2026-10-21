@@ -15,9 +15,12 @@ urlpatterns = [
     path("resident/dashboard/",views.resident_dashboard,name="resident_dashboard",),
     path("staff/dashboard/",views.admin_dashboard,name="admin_dashboard",),
 
+    path("resident/request/<int:document_id>/",views.request_document,name="request_document"),
     # Document Management - Staff CRUD
     path("staff/documents/",views.manage_documents,name="manage_documents",),
     path("staff/documents/add/",views.add_document,name="add_document",),
     path("staff/documents/<int:document_id>/edit/",views.edit_document,name="edit_document",),
+    path("staff/documents/delete/<int:document_id>/",views.delete_document,name="delete_document",),
+
     path("staff/documents/<int:document_id>/toggle-availability/",views.toggle_document_availability,name="toggle_document_availability",),
 ]

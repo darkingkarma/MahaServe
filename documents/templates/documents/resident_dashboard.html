@@ -118,22 +118,60 @@
         .document-list {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
+            gap: 20px;
         }
 
         .document-card {
             border: 1px solid #e5e7eb;
             border-radius: 8px;
             padding: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
 
         .document-card h3 {
-            margin-top: 0;
+            margin: 0 0 10px;
+            color: #17365d;
+        }
+
+        .document-image {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            background: #f4f7fb;
+        }
+
+        .document-description {
+            line-height: 1.6;
+            color: #5b6573;
+            flex-grow: 1;
         }
 
         .fee {
             font-weight: bold;
             color: #17365d;
+            margin-top: 8px;
+        }
+
+        .request-button {
+            display: inline-block;
+            background: #17365d;
+            color: white;
+            padding: 11px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .request-button:hover {
+            background: #24518a;
         }
 
         .empty {
@@ -150,6 +188,11 @@
             cursor: pointer;
         }
 
+        .logout-button:hover {
+            background: white;
+            color: #17365d;
+        }
+
         @media (max-width: 600px) {
             header {
                 padding: 18px 5%;
@@ -161,6 +204,10 @@
 
             .container {
                 margin-top: 25px;
+            }
+
+            .stat-card, .section {
+                padding: 18px;
             }
         }
     </style>
@@ -191,17 +238,17 @@
     <div class="stats">
         <div class="stat-card">
             <p>Total Requests</p>
-            <h2>{{ total_requests }}</h2>
+            <h2>{{ total_requests|default:0 }}</h2>
         </div>
 
         <div class="stat-card">
             <p>Pending Requests</p>
-            <h2>{{ pending_requests }}</h2>
+            <h2>{{ pending_requests|default:0 }}</h2>
         </div>
 
         <div class="stat-card">
             <p>Released Documents</p>
-            <h2>{{ released_requests }}</h2>
+            <h2>{{ released_requests|default:0 }}</h2>
         </div>
     </div>
 
@@ -243,18 +290,38 @@
 
     <section class="section">
         <h2>Available Document Types</h2>
+        <p>Select a document below to start your request.</p>
 
         {% if document_types %}
             <div class="document-list">
                 {% for document in document_types %}
                     <div class="document-card">
+
+                        {% if document.image %}
+                            <img
+                                src="{{ document.image.url }}"
+                                alt="{{ document.name }}"
+                                class="document-image"
+                            >
+                        {% endif %}
+
                         <h3>{{ document.name }}</h3>
 
-                        <p>{{ document.description|default:"Barangay document service." }}</p>
+                        <p class="document-description">
+                            {{ document.description|default:"Barangay document service." }}
+                        </p>
 
                         <p class="fee">
                             Fee: ₱{{ document.fee|floatformat:2 }}
                         </p>
+
+                        <a
+                            href="{% url 'request_document' document.id %}"
+                            class="request-button"
+                        >
+                            Request Document
+                        </a>
+
                     </div>
                 {% endfor %}
             </div>
