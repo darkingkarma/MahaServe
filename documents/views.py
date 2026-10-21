@@ -227,15 +227,22 @@ def manage_documents(request):
 @staff_member_required(login_url="/login/")
 def add_document(request):
     if request.method == "POST":
+        name@staff_member_required(login_url="/login/")
+def add_document(request):
+    if request.method == "POST":
         name = request.POST.get("name", "").strip()
         description = request.POST.get("description", "").strip()
         fee = request.POST.get("fee", "").strip()
+        image = request.FILES.get("image")
 
         if not name or not fee:
             messages.error(request, "Name and fee are required.")
 
         elif DocumentType.objects.filter(name__iexact=name).exists():
             messages.error(request, "This document type already exists.")
+
+        elif image and not image.content_type.startswith("image/"):
+            messages.error(request, "Please upload a valid image file.")
 
         else:
             try:
@@ -250,14 +257,21 @@ def add_document(request):
                     name=name,
                     description=description,
                     fee=parsed_fee,
+                    image=image,
                     is_available=True,
                 )
 
-                messages.success(request, "Document type added successfully!")
+                messages.success(
+                    request,
+                    "Document type added successfully!"
+                )
                 return redirect("manage_documents")
 
             except (InvalidOperation, ValueError):
-                messages.error(request, "Please enter a valid, non-negative fee.")
+                messages.error(
+                    request,
+                    "Please enter a valid, non-negative fee."
+                )
 
     return render(request, "documents/add_document.html")
 
@@ -270,14 +284,18 @@ def edit_document(request, document_id):
         name = request.POST.get("name", "").strip()
         description = request.POST.get("description", "").strip()
         fee = request.POST.get("fee", "").strip()
+        image = request.FILES.get("image")
 
         if not name or not fee:
             messages.error(request, "Name and fee are required.")
 
         elif DocumentType.objects.filter(
             name__iexact=name
-        ).exclude(id=document.id).exists():
-            messages.error(request, "Another document type has this name.")
+        ).exclude(id=document_id).exists():
+            messages.error(request, "This document type already exists.")
+
+        elif image and not image.content_type.startswith("image/"):
+            messages.error(request, "Please upload a valid image file.")
 
         else:
             try:
@@ -291,20 +309,29 @@ def edit_document(request, document_id):
                 document.name = name
                 document.description = description
                 document.fee = parsed_fee
+
+                if image:
+                    document.image = image
+
                 document.save()
 
-                messages.success(request, "Document type updated successfully!")
+                messages.success(
+                    request,
+                    "Document type updated successfully!"
+                )
                 return redirect("manage_documents")
 
             except (InvalidOperation, ValueError):
-                messages.error(request, "Please enter a valid, non-negative fee.")
+                messages.error(
+                    request,
+                    "Please enter a valid, non-negative fee."
+                )
 
     return render(
         request,
         "documents/edit_document.html",
-        {"document": document},
+        {"document": document}
     )
-
 
 @staff_member_required(login_url="/login/")
 def toggle_document_availability(request, document_id):

@@ -35,7 +35,7 @@
 
     table {
         width: 100%;
-        min-width: 700px;
+        min-width: 850px;
         border-collapse: collapse;
     }
 
@@ -43,12 +43,37 @@
         padding: 14px;
         border-bottom: 1px solid #e5e7eb;
         text-align: left;
+        vertical-align: middle;
     }
 
     th {
         background: #f8fafc;
         color: #64748b;
         font-size: 13px;
+    }
+
+    .document-image {
+        width: 75px;
+        height: 75px;
+        object-fit: contain;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 4px;
+        background: #fff;
+    }
+
+    .no-image {
+        display: flex;
+        width: 75px;
+        height: 75px;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+        background: #f8fafc;
+        color: #94a3b8;
+        font-size: 11px;
     }
 
     .availability {
@@ -107,6 +132,7 @@
     <table>
         <thead>
             <tr>
+                <th>Image</th>
                 <th>Document Name</th>
                 <th>Description</th>
                 <th>Fee</th>
@@ -118,6 +144,21 @@
         <tbody>
             {% for document in document_types %}
                 <tr>
+                    <td>
+                        {% if document.image %}
+                            <img
+                                src="{{ document.image.url }}"
+                                alt="{{ document.name }}"
+                                class="document-image"
+                                loading="lazy"
+                            >
+                        {% else %}
+                            <div class="no-image">
+                                No image
+                            </div>
+                        {% endif %}
+                    </td>
+
                     <td>{{ document.name }}</td>
 
                     <td>
@@ -169,7 +210,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="5" class="empty">
+                    <td colspan="6" class="empty">
                         No document types found. Add your first document type.
                     </td>
                 </tr>

@@ -52,6 +52,17 @@
         font-size: 13px;
     }
 
+    .current-image {
+        display: block;
+        max-width: 220px;
+        max-height: 220px;
+        margin: 10px 0 15px;
+        object-fit: contain;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 6px;
+    }
+
     .form-actions {
         display: flex;
         flex-wrap: wrap;
@@ -64,11 +75,11 @@
     <h2>Edit Document</h2>
 
     <p class="form-description">
-        Update the name, description, or processing fee for
+        Update the name, description, processing fee, or image for
         <strong>{{ document.name }}</strong>.
     </p>
 
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="form-group">
@@ -111,6 +122,36 @@
             </span>
         </div>
 
+        <div class="form-group">
+            <label for="image">Document Image (Optional)</label>
+
+            {% if document.image %}
+                <p>Current image:</p>
+
+                <img
+                    src="{{ document.image.url }}"
+                    alt="{{ document.name }}"
+                    class="current-image"
+                >
+            {% else %}
+                <p class="form-help">
+                    No image has been uploaded for this document yet.
+                </p>
+            {% endif %}
+
+            <input
+                type="file"
+                id="image"
+                name="image"
+                accept="image/*"
+            >
+
+            <span class="form-help">
+                Select a new image only if you want to replace the current one.
+                Leave this field empty to keep the existing image.
+            </span>
+        </div>
+
         <div class="form-actions">
             <button type="submit" class="btn btn-yellow">
                 Save Changes
@@ -122,4 +163,5 @@
         </div>
     </form>
 </div>
+
 {% endblock %}
