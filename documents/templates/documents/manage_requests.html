@@ -1,0 +1,303 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Requests - MahaServe</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #263445;
+        }
+
+        header {
+            background: #17365d;
+            color: white;
+            padding: 20px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        header h2 {
+            margin: 0;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .section {
+            background: white;
+            padding: 24px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .section h1 {
+            margin-top: 0;
+            color: #17365d;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 1100px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #17365d;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            background: #e8eef7;
+            color: #17365d;
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .empty {
+            color: #6b7280;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 18px;
+            color: #17365d;
+            text-decoration: none;
+        }
+
+        .request-form {
+            min-width: 200px;
+        }
+
+        .request-form select,
+        .request-form textarea {
+            width: 100%;
+            padding: 9px;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            margin-bottom: 9px;
+        }
+
+        .request-form textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .save-button {
+            background: #17365d;
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .save-button:hover {
+            background: #24518a;
+        }
+
+        .message {
+            padding: 12px 15px;
+            margin: 12px 0;
+            border-radius: 6px;
+        }
+
+        .message.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .message.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .message.info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        @media (max-width: 600px) {
+            .section {
+                padding: 16px;
+            }
+
+            main {
+                margin-top: 25px;
+                padding: 0 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>MahaServe Staff</h2>
+    <a href="{% url 'admin_dashboard' %}">Back to Dashboard</a>
+</header>
+
+<main>
+    <a class="back-link" href="{% url 'admin_dashboard' %}">
+        &larr; Staff Dashboard
+    </a>
+
+    <section class="section">
+        <h1>Manage Document Requests</h1>
+        <p>Review and process document requests submitted by residents.</p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if requests_list %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Resident</th>
+                            <th>Document</th>
+                            <th>Purpose</th>
+                            <th>Date Submitted</th>
+                            <th>Current Status</th>
+                            <th>Staff Remarks</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for item in requests_list %}
+                            <tr>
+                                <td>
+                                    {{ item.resident.username }}
+                                </td>
+
+                                <td>
+                                    {{ item.document_type.name }}
+                                </td>
+
+                                <td>
+                                    {{ item.purpose|truncatewords:15 }}
+                                </td>
+
+                                <td>
+                                    {{ item.submitted_at|date:"M d, Y" }}
+                                </td>
+
+                                <td>
+                                    <span class="status">
+                                        {{ item.get_status_display }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {{ item.remarks|default:"No remarks yet." }}
+                                </td>
+
+                                <td>
+                                    <form
+                                        method="POST"
+                                        action="{% url 'update_request' item.id %}"
+                                        class="request-form"
+                                    >
+                                        {% csrf_token %}
+
+                                        <label for="status-{{ item.id }}">
+                                            Update Status
+                                        </label>
+
+                                        <select
+                                            id="status-{{ item.id }}"
+                                            name="status"
+                                            required
+                                        >
+                                            {% for value, label in status_choices %}
+                                                <option
+                                                    value="{{ value }}"
+                                                    {% if item.status == value %}selected{% endif %}
+                                                >
+                                                    {{ label }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+
+                                        <label for="remarks-{{ item.id }}">
+                                            Remarks
+                                        </label>
+
+                                        <textarea
+                                            id="remarks-{{ item.id }}"
+                                            name="remarks"
+                                            placeholder="Enter remarks for the resident..."
+                                        >{{ item.remarks }}</textarea>
+
+                                        <button
+                                            type="submit"
+                                            class="save-button"
+                                        >
+                                            Save Changes
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="empty">
+                There are no document requests yet.
+            </p>
+        {% endif %}
+    </section>
+</main>
+
+</body>
+</html>

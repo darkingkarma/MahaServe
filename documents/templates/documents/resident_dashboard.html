@@ -263,6 +263,7 @@
                         <th>Purpose</th>
                         <th>Date Submitted</th>
                         <th>Status</th>
+                        <th>Staff Remarks</th>
                     </tr>
                 </thead>
 
@@ -276,6 +277,9 @@
                                 <span class="status">
                                     {{ item.get_status_display }}
                                 </span>
+                            </td>
+<td>
+                                {{ request.remarks|default:"No remarks yet." }}
                             </td>
                         </tr>
                     {% endfor %}

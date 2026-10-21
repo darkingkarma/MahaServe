@@ -232,6 +232,74 @@ def admin_dashboard(request):
         context,
     )
 
+@staff_member_required(login_url="/login/")
+def request_details(request, request_id):
+    document_request = get_object_or_404(
+        DocumentRequest.objects.select_related(
+            "resident",
+            "document_type"
+        ),
+        id=request_id
+    )
+
+    context = {
+        "document_request": document_request,
+    }
+
+    return render(
+        request,
+        "documents/request_details.html",
+        context
+    )
+    
+@staff_member_required(login_url="/login/")
+def manage_requests(request):
+    requests_list = DocumentRequest.objects.select_related(
+        "resident",
+        "document_type",
+    ).order_by("-submitted_at")
+
+    context = {
+        "requests_list": requests_list,
+        "status_choices": DocumentRequest.STATUS_CHOICES,
+    }
+
+    return render(
+        request,
+        "documents/manage_requests.html",
+        context,
+    )
+
+
+@staff_member_required(login_url="/login/")
+def update_request(request, request_id):
+    if request.method != "POST":
+        return redirect("manage_requests")
+
+    document_request = get_object_or_404(
+        DocumentRequest,
+        id=request_id
+    )
+
+    new_status = request.POST.get("status", "").strip()
+    remarks = request.POST.get("remarks", "").strip()
+
+    valid_statuses = dict(DocumentRequest.STATUS_CHOICES)
+
+    if new_status not in valid_statuses:
+        messages.error(request, "Invalid request status.")
+        return redirect("manage_requests")
+
+    document_request.status = new_status
+    document_request.remarks = remarks
+    document_request.save(update_fields=["status", "remarks", "updated_at"])
+
+    messages.success(
+        request,
+        f"Request #{document_request.id} updated successfully."
+    )
+
+    return redirect("manage_requests")
 
 # ==========================================
 # DOCUMENT MANAGEMENT - STAFF CRUD
