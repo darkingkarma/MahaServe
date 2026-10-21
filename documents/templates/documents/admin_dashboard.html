@@ -77,9 +77,24 @@
                 <h1>Admin Dashboard</h1>
                 <p>Overview of barangay document requests.</p>
             </div>
-            <a href="/">View Landing Page</a>
-        </div>
 
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <a href="/">View Landing Page</a>
+
+                <form method="post" action="{% url 'logout' %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" style="
+                        background: #dc3545;
+                        color: white;
+                        padding: 11px 16px;
+                        border: none;
+                        border-radius: 7px;
+                        font-weight: bold;
+                        cursor: pointer;
+                    ">Logout</button>
+                </form>
+            </div>
+        </div>
         <section class="stats">
             <div class="card">
                 <p>Total Requests</p>
