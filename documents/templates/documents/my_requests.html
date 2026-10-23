@@ -1,0 +1,390 @@
+{% extends "documents/resident_base.html" %}
+
+{% block title %}My Requests - MahaServe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 25px;
+    }
+
+    .page-header h1 {
+        margin-bottom: 8px;
+        color: #17365d;
+    }
+
+    .page-header p {
+        color: #5b6573;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .requests-section {
+        background: white;
+        padding: 24px;
+        border-radius: 10px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+        overflow-x: auto;
+    }
+
+    .requests-section h2 {
+        margin-top: 0;
+        color: #17365d;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 850px;
+    }
+
+    th,
+    td {
+        padding: 14px 12px;
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    th {
+        background: #f8fafc;
+        color: #17365d;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    td {
+        font-size: 14px;
+        color: #4b5563;
+        line-height: 1.5;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 20px;
+        background: #e8eef7;
+        color: #17365d;
+        font-size: 12px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-under_review {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-approved {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-rejected {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-released {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .remarks {
+        max-width: 250px;
+        overflow-wrap: anywhere;
+    }
+
+    .collection-notice {
+        margin-top: 10px;
+        padding: 12px;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 6px;
+        color: #166534;
+        min-width: 180px;
+    }
+
+    .collection-notice strong {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .collection-notice p {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .status-notice {
+        margin-top: 8px;
+        font-size: 12px;
+        line-height: 1.5;
+        color: #5b6573;
+    }
+
+    .payment-box {
+        margin-top: 10px;
+        padding: 12px;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 6px;
+        min-width: 180px;
+    }
+
+    .payment-box strong {
+        display: block;
+        margin-bottom: 5px;
+        color: #17365d;
+    }
+
+    .payment-box p {
+        margin: 0 0 10px 0;
+        font-size: 13px;
+        color: #4b5563;
+    }
+
+    .payment-button {
+        display: inline-block;
+        background: #17365d;
+        color: white;
+        padding: 9px 14px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: bold;
+        transition: background 0.2s;
+    }
+
+    .payment-button:hover {
+        background: #24518a;
+    }
+
+    .paid-label {
+        display: inline-block;
+        padding: 7px 10px;
+        background: #dcfce7;
+        color: #166534;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    .free-label {
+        display: inline-block;
+        padding: 7px 10px;
+        background: #f3f4f6;
+        color: #4b5563;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    .empty {
+        color: #6b7280;
+        padding: 20px 0;
+        margin: 0;
+    }
+
+    .request-button {
+        display: inline-block;
+        background: #17365d;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: bold;
+        margin-top: 15px;
+        transition: background 0.2s;
+    }
+
+    .request-button:hover {
+        background: #24518a;
+    }
+
+    @media (max-width: 600px) {
+        .requests-section {
+            padding: 18px;
+        }
+
+        .page-header h1 {
+            font-size: 25px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>My Document Requests</h1>
+    <p>
+        View and track the status of your barangay document requests.
+    </p>
+</div>
+
+<section class="requests-section">
+
+    {% if requests %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Document</th>
+                    <th>Purpose</th>
+                    <th>Date Submitted</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                    <th>Staff Remarks</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in requests %}
+                <tr>
+
+                    <td>
+                        {{ item.document_type.name }}
+                    </td>
+
+                    <td>
+                        {{ item.purpose|truncatewords:10 }}
+                    </td>
+
+                    <td>
+                        {{ item.submitted_at|date:"M d, Y" }}
+                    </td>
+
+                    <td>
+                        <span class="status status-{{ item.status }}">
+                            {{ item.get_status_display }}
+                        </span>
+
+                        {% if item.status == "released" %}
+
+                            <div class="collection-notice">
+                                <strong>Ready for Collection!</strong>
+                                <p>
+                                    Your document is ready. Please visit
+                                    Barangay Mahayahay Hall to claim it.
+                                    Bring a valid ID and your request details.
+                                </p>
+                            </div>
+
+                        {% elif item.status == "rejected" %}
+
+                            <div class="status-notice">
+                                Your request was rejected. Please check
+                                the staff remarks for more information.
+                            </div>
+
+                        {% elif item.status == "approved" %}
+
+                            <div class="status-notice">
+                                Your request has been approved.
+                                Please complete payment if required.
+                            </div>
+
+                        {% elif item.status == "under_review" %}
+
+                            <div class="status-notice">
+                                Your request is being reviewed by the
+                                barangay staff.
+                            </div>
+
+                        {% elif item.status == "pending" %}
+
+                            <div class="status-notice">
+                                Your request has been submitted and is
+                                waiting for staff review.
+                            </div>
+
+                        {% endif %}
+                    </td>
+
+                    <td>
+
+                        {% if item.document_type.fee > 0 %}
+
+                            {% with payment=item.payments.last %}
+
+                                {% if payment and payment.status == "paid" %}
+
+                                    <span class="paid-label">
+                                        ✓ Paid
+                                    </span>
+
+                                {% elif item.status == "approved" %}
+
+                                    <div class="payment-box">
+
+                                        <strong>
+                                            ₱{{ item.document_type.fee|floatformat:2 }}
+                                        </strong>
+
+                                        <p>
+                                            Payment is required for this document.
+                                        </p>
+
+                                        <a
+                                            href="{% url 'create_payment' item.id %}"
+                                            class="payment-button"
+                                        >
+                                            Pay Now
+                                        </a>
+
+                                    </div>
+
+                                {% else %}
+
+                                    <span class="free-label">
+                                        Payment after approval
+                                    </span>
+
+                                {% endif %}
+
+                            {% endwith %}
+
+                        {% else %}
+
+                            <span class="free-label">
+                                Free
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td class="remarks">
+                        {{ item.remarks|default:"No remarks yet."|linebreaksbr }}
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    {% else %}
+
+        <p class="empty">
+            You haven't submitted any document requests yet.
+        </p>
+
+        <a
+            href="{% url 'resident_dashboard' %}"
+            class="request-button"
+        >
+            Browse Available Documents
+        </a>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

@@ -1,342 +1,159 @@
+{% extends "documents/resident_base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resident Dashboard - MahaServe</title>
+{% block title %}Resident Dashboard - MahaServe{% endblock %}
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+{% block extra_css %}
+<style>
+    .welcome {
+        margin-bottom: 25px;
+    }
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f7fb;
-            color: #263445;
-        }
+    .welcome h1 {
+        margin-bottom: 8px;
+        color: #17365d;
+    }
 
-        header {
-            background: #17365d;
-            color: white;
-            padding: 20px 6%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
+    .document-section {
+        background: white;
+        padding: 24px;
+        border-radius: 10px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+    }
 
-        header h2 {
-            margin: 0;
-        }
+    .document-section h2 {
+        margin-top: 0;
+        color: #17365d;
+    }
 
-        header a {
-            color: white;
-            text-decoration: none;
-            margin-left: 18px;
-        }
+    .document-section > p {
+        color: #5b6573;
+        margin-bottom: 20px;
+    }
 
-        .container {
-            max-width: 1100px;
-            margin: 35px auto;
-            padding: 0 20px;
-        }
+    .document-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+    }
 
-        .welcome {
-            margin-bottom: 25px;
-        }
+    .document-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
 
-        .welcome h1 {
-            margin-bottom: 8px;
-            color: #17365d;
-        }
+    .document-card h3 {
+        margin: 0 0 10px;
+        color: #17365d;
+    }
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
+    .document-image {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        background: #f4f7fb;
+    }
 
-        .stat-card, .section {
-            background: white;
-            padding: 24px;
-            border-radius: 10px;
-            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
-        }
+    .document-description {
+        line-height: 1.6;
+        color: #5b6573;
+        flex-grow: 1;
+    }
 
-        .stat-card p {
-            color: #6b7280;
-            margin-bottom: 8px;
-        }
+    .fee {
+        font-weight: bold;
+        color: #17365d;
+        margin-top: 8px;
+    }
 
-        .stat-card h2 {
-            margin: 0;
-            color: #17365d;
-            font-size: 30px;
-        }
+    .request-button {
+        display: inline-block;
+        width: 100%;
+        background: #17365d;
+        color: white;
+        padding: 11px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        text-align: center;
+        margin-top: 10px;
+        font-size: 14px;
+        font-weight: bold;
+        transition: background 0.2s;
+    }
 
-        .section {
-            margin-bottom: 25px;
-            overflow-x: auto;
-        }
+    .request-button:hover {
+        background: #24518a;
+    }
 
-        .section h2 {
-            margin-top: 0;
-            color: #17365d;
-        }
+    .empty {
+        color: #6b7280;
+        padding: 15px 0;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 550px;
-        }
-
-        th, td {
-            padding: 14px 12px;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        th {
-            background: #f8fafc;
-        }
-
-        .status {
-            display: inline-block;
-            padding: 6px 10px;
-            border-radius: 20px;
-            background: #e8eef7;
-            color: #17365d;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .document-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-        }
-
-        .document-card {
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
+    @media (max-width: 600px) {
+        .document-section {
             padding: 18px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
         }
+    }
+</style>
+{% endblock %}
 
-        .document-card h3 {
-            margin: 0 0 10px;
-            color: #17365d;
-        }
+{% block content %}
 
-        .document-image {
-            width: 100%;
-            height: 160px;
-            object-fit: cover;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            background: #f4f7fb;
-        }
+<div class="welcome">
+    <h1>Welcome, {{ request.user.username }}!</h1>
+    <p>Choose a barangay document below to start your request.</p>
+</div>
 
-        .document-description {
-            line-height: 1.6;
-            color: #5b6573;
-            flex-grow: 1;
-        }
+<section class="document-section">
+    <h2>Available Document Types</h2>
+    <p>Select a document below to view its details and submit a request.</p>
 
-        .fee {
-            font-weight: bold;
-            color: #17365d;
-            margin-top: 8px;
-        }
+    {% if document_types %}
+        <div class="document-list">
 
-        .request-button {
-            display: inline-block;
-            background: #17365d;
-            color: white;
-            padding: 11px 16px;
-            border-radius: 6px;
-            text-decoration: none;
-            text-align: center;
-            margin-top: 10px;
-            font-size: 14px;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
+            {% for document in document_types %}
+                <div class="document-card">
 
-        .request-button:hover {
-            background: #24518a;
-        }
-
-        .empty {
-            color: #6b7280;
-            padding: 15px 0;
-        }
-
-        .logout-button {
-            background: transparent;
-            color: white;
-            border: 1px solid white;
-            padding: 9px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .logout-button:hover {
-            background: white;
-            color: #17365d;
-        }
-
-        @media (max-width: 600px) {
-            header {
-                padding: 18px 5%;
-            }
-
-            header a {
-                margin-left: 0;
-            }
-
-            .container {
-                margin-top: 25px;
-            }
-
-            .stat-card, .section {
-                padding: 18px;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-<header>
-    <h2>MahaServe</h2>
-
-    <div>
-        <a href="{% url 'landing' %}">Home</a>
-
-        <form method="post" action="{% url 'logout' %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" class="logout-button">Logout</button>
-        </form>
-    </div>
-</header>
-
-<main class="container">
-
-    <div class="welcome">
-        <h1>Welcome, {{ request.user.username }}!</h1>
-        <p>Manage your barangay document requests here.</p>
-    </div>
-
-    <div class="stats">
-        <div class="stat-card">
-            <p>Total Requests</p>
-            <h2>{{ total_requests|default:0 }}</h2>
-        </div>
-
-        <div class="stat-card">
-            <p>Pending Requests</p>
-            <h2>{{ pending_requests|default:0 }}</h2>
-        </div>
-
-        <div class="stat-card">
-            <p>Released Documents</p>
-            <h2>{{ released_requests|default:0 }}</h2>
-        </div>
-    </div>
-
-    <section class="section">
-        <h2>My Document Requests</h2>
-
-        {% if my_requests %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Document</th>
-                        <th>Purpose</th>
-                        <th>Date Submitted</th>
-                        <th>Status</th>
-                        <th>Staff Remarks</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for item in my_requests %}
-                        <tr>
-                            <td>{{ item.document_type.name }}</td>
-                            <td>{{ item.purpose|truncatewords:8 }}</td>
-                            <td>{{ item.submitted_at|date:"M d, Y" }}</td>
-                            <td>
-                                <span class="status">
-                                    {{ item.get_status_display }}
-                                </span>
-                            </td>
-<td>
-                                {{ request.remarks|default:"No remarks yet." }}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p class="empty">
-                You haven't submitted any document requests yet.
-            </p>
-        {% endif %}
-    </section>
-
-    <section class="section">
-        <h2>Available Document Types</h2>
-        <p>Select a document below to start your request.</p>
-
-        {% if document_types %}
-            <div class="document-list">
-                {% for document in document_types %}
-                    <div class="document-card">
-
-                        {% if document.image %}
-                            <img
-                                src="{{ document.image.url }}"
-                                alt="{{ document.name }}"
-                                class="document-image"
-                            >
-                        {% endif %}
-
-                        <h3>{{ document.name }}</h3>
-
-                        <p class="document-description">
-                            {{ document.description|default:"Barangay document service." }}
-                        </p>
-
-                        <p class="fee">
-                            Fee: ₱{{ document.fee|floatformat:2 }}
-                        </p>
-
-                        <a
-                            href="{% url 'request_document' document.id %}"
-                            class="request-button"
+                    {% if document.image %}
+                        <img
+                            src="{{ document.image.url }}"
+                            alt="{{ document.name }}"
+                            class="document-image"
                         >
-                            Request Document
-                        </a>
+                    {% endif %}
 
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="empty">
-                No document types are currently available.
-            </p>
-        {% endif %}
-    </section>
+                    <h3>{{ document.name }}</h3>
 
-</main>
+                    <p class="document-description">
+                        {{ document.description|default:"Barangay document service." }}
+                    </p>
 
-</body>
-</html>
+                    <p class="fee">
+                        Fee: ₱{{ document.fee|floatformat:2 }}
+                    </p>
+
+                    <a
+                        href="{% url 'request_document' document.id %}"
+                        class="request-button"
+                    >
+                        Request Document
+                    </a>
+
+                </div>
+            {% endfor %}
+
+        </div>
+    {% else %}
+        <p class="empty">
+            No document types are currently available.
+        </p>
+    {% endif %}
+</section>
+
+{% endblock %}

@@ -1,0 +1,253 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}MahaServe{% endblock %}</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            color: #17233c;
+        }
+
+        /* Sticky navigation */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #14284b;
+            color: white;
+            box-shadow: 0 3px 12px #14284b20;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            min-height: 70px;
+            margin: auto;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .brand {
+            color: white;
+            font-size: 23px;
+            font-weight: bold;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .nav-links a {
+            color: #e8eef9;
+            text-decoration: none;
+            padding: 10px 12px;
+            border-radius: 7px;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: #294873;
+            color: white;
+        }
+
+        /* AI Assistant navigation link */
+        .nav-links a.ai-link {
+            background: #2563eb;
+            color: white;
+        }
+
+        .nav-links a.ai-link:hover {
+            background: #1d4ed8;
+        }
+
+        .logout-form {
+            margin: 0;
+        }
+
+        .logout-button {
+            border: 1px solid #ffffff70;
+            border-radius: 7px;
+            background: transparent;
+            color: white;
+            padding: 10px 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .logout-button:hover {
+            background: #294873;
+        }
+
+        /* Main content */
+        .page-container {
+            width: 92%;
+            max-width: 1200px;
+            min-height: calc(100vh - 145px);
+            margin: 30px auto;
+        }
+
+        /* Django messages */
+        .messages-container {
+            margin-bottom: 22px;
+        }
+
+        .alert {
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .alert.success {
+            background: #e8f7ed;
+            color: #21663a;
+            border-color: #b8e4c5;
+        }
+
+        .alert.error {
+            background: #fff1f0;
+            color: #a12622;
+            border-color: #f3c4c0;
+        }
+
+        .alert.warning {
+            background: #fff8e5;
+            color: #805b00;
+            border-color: #f0dda1;
+        }
+
+        .alert.info {
+            background: #eaf3ff;
+            color: #244e89;
+            border-color: #c4daf8;
+        }
+
+        /* Shared footer */
+        .footer {
+            text-align: center;
+            padding: 22px 16px;
+            color: #64718a;
+            font-size: 13px;
+            border-top: 1px solid #e3e8f1;
+            background: white;
+        }
+
+        @media (max-width: 700px) {
+            .nav-container {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .nav-links {
+                justify-content: flex-start;
+                width: 100%;
+            }
+
+            .nav-links a {
+                padding: 9px;
+            }
+
+            .page-container {
+                margin: 20px auto;
+            }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <header class="navbar">
+        <div class="nav-container">
+
+            <a class="brand" href="{% url 'resident_dashboard' %}">
+                MahaServe
+            </a>
+
+            <nav class="nav-links">
+
+                <a href="{% url 'resident_dashboard' %}">
+                    Dashboard
+                </a>
+
+                <a href="{% url 'my_requests' %}">
+                    My Requests
+                </a>
+
+                <a href="{% url 'resident_profile' %}">
+                    My Profile
+                </a>
+
+                <a href="{% url 'ai_assistant' %}" class="ai-link">
+                    🤖 AI Assistant
+                </a>
+
+                <form
+                    class="logout-form"
+                    method="post"
+                    action="{% url 'logout' %}"
+                >
+                    {% csrf_token %}
+
+                    <button class="logout-button" type="submit">
+                        Logout
+                    </button>
+                </form>
+
+            </nav>
+        </div>
+    </header>
+
+    <main class="page-container">
+
+        {% if messages %}
+            <div class="messages-container" aria-live="polite">
+
+                {% for message in messages %}
+
+                    <div class="alert {{ message.tags|default:'info' }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+    <footer class="footer">
+        &copy; {% now "Y" %} MahaServe |
+        Barangay Mahayahay Document Request and Processing System
+    </footer>
+
+</body>
+</html>
+    

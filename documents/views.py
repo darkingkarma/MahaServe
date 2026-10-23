@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from groq import Groq
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
@@ -7,10 +8,13 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db import IntegrityError
-
-from .models import DocumentType, DocumentRequest
+from decimal import Decimal
+from .models import DocumentType, DocumentRequest, ResidentProfile, DocumentPayment
 import resend
 from django.conf import settings
+from django.urls import reverse
+import requests
+from django.views.decorators.http import require_POST
 
 # ==========================================
 # LANDING PAGE
@@ -22,6 +26,7 @@ def landing(request):
 # ==========================================
 # CITIZEN REGISTRATION
 # ==========================================
+
 
 def register(request):
     if request.user.is_authenticated:
@@ -35,8 +40,16 @@ def register(request):
         password = request.POST.get("password", "")
         confirm_password = request.POST.get("confirm_password", "")
 
+        # Resident profile fields
+        contact_number = request.POST.get("contact_number", "").strip()
+        house_number = request.POST.get("house_number", "").strip()
+        street = request.POST.get("street", "").strip()
+        purok = request.POST.get("purok", "").strip()
+        date_of_birth = request.POST.get("date_of_birth", "").strip()
+        sex = request.POST.get("sex", "").strip()
+
         if not username or not email or not password or not confirm_password:
-            messages.error(request, "Please fill in all fields.")
+            messages.error(request, "Please fill in all required fields.")
 
         elif password != confirm_password:
             messages.error(request, "Passwords do not match.")
@@ -50,19 +63,53 @@ def register(request):
         elif User.objects.filter(email__iexact=email).exists():
             messages.error(request, "Email is already registered.")
 
+        elif sex and sex not in ["male", "female", "prefer_not_to_say"]:
+            messages.error(request, "Please select a valid sex option.")
+
         else:
             try:
-                User.objects.create_user(
-                    username=username,
-                    email=email,
-                    password=password,
-                )
+                from datetime import date
+                from django.db import transaction
+                from .models import ResidentProfile
+
+                parsed_date = None
+                if date_of_birth:
+                    try:
+                        parsed_date = date.fromisoformat(date_of_birth)
+                        if parsed_date > date.today():
+                            messages.error(
+                                request,
+                                "Date of birth cannot be in the future."
+                            )
+                            return render(request, "documents/register.html")
+                    except ValueError:
+                        messages.error(
+                            request,
+                            "Please enter a valid date of birth."
+                        )
+                        return render(request, "documents/register.html")
+
+                with transaction.atomic():
+                    user = User.objects.create_user(
+                        username=username,
+                        email=email,
+                        password=password,
+                    )
+
+                    ResidentProfile.objects.create(
+                        user=user,
+                        contact_number=contact_number,
+                        house_number=house_number,
+                        street=street,
+                        purok=purok,
+                        date_of_birth=parsed_date,
+                        sex=sex,
+                    )
 
                 messages.success(
                     request,
                     "Registration successful! You can now log in."
                 )
-
                 return redirect("login")
 
             except IntegrityError:
@@ -72,6 +119,7 @@ def register(request):
                 )
 
     return render(request, "documents/register.html")
+
 
 
 # ==========================================
@@ -191,6 +239,291 @@ def request_document(request, document_id):
         {"document": document}
     )
 
+# ==========================================
+# PAYMONGO PAYMENTS
+# ==========================================
+
+@login_required(login_url="/login/")
+def create_payment(request, request_id):
+    document_request = get_object_or_404(
+        DocumentRequest.objects.select_related("document_type"),
+        id=request_id,
+        resident=request.user,
+        status="approved",
+    )
+
+    amount = document_request.document_type.fee
+
+    if amount <= Decimal("0.00"):
+        messages.error(
+            request,
+            "This document does not require payment."
+        )
+        return redirect("my_requests")
+
+    if not settings.PAYMONGO_SECRET_KEY:
+        messages.error(
+            request,
+            "Payment service is not configured."
+        )
+        return redirect("my_requests")
+
+    # Reuse an existing pending checkout if available.
+    existing_payment = DocumentPayment.objects.filter(
+        document_request=document_request,
+        status="pending",
+    ).exclude(
+        checkout_url=""
+    ).first()
+
+    if existing_payment:
+        return redirect(existing_payment.checkout_url)
+
+    payment = DocumentPayment.objects.create(
+        document_request=document_request,
+        amount=amount,
+        status="pending",
+    )
+
+    amount_in_centavos = int(amount * 100)
+
+    checkout_data = {
+        "data": {
+            "attributes": {
+                "line_items": [
+                    {
+                        "currency": "PHP",
+                        "amount": amount_in_centavos,
+                        "name": document_request.document_type.name,
+                        "quantity": 1,
+                    }
+                ],
+                "payment_method_types": [
+                    "gcash"
+                ],
+                "success_url": request.build_absolute_uri(
+                    f"/payment/success/?request_id={document_request.id}"
+                ),
+                "cancel_url": request.build_absolute_uri(
+                    f"/payment/cancel/?request_id={document_request.id}"
+                ),
+                "description": (
+                    f"MahaServe - "
+                    f"{document_request.document_type.name}"
+                ),
+                "reference_number": f"MAHASERVE-{payment.id}",
+            }
+        }
+    }
+
+    try:
+        response = requests.post(
+            "https://api.paymongo.com/v1/checkout_sessions",
+            auth=(settings.PAYMONGO_SECRET_KEY, ""),
+            json=checkout_data,
+            timeout=30,
+        )
+
+        response_data = response.json()
+
+        if response.status_code not in (200, 201):
+            payment.status = "failed"
+            payment.save(
+                update_fields=[
+                    "status",
+                    "updated_at",
+                ]
+            )
+
+            print("PayMongo error:", response_data)
+
+            messages.error(
+                request,
+                "Could not create checkout. Please try again."
+            )
+
+            return redirect("my_requests")
+
+        checkout_session = response_data["data"]
+        attributes = checkout_session["attributes"]
+
+        payment.checkout_session_id = checkout_session["id"]
+        payment.checkout_url = attributes["checkout_url"]
+
+        payment.payment_intent_id = attributes.get(
+            "payment_intent",
+            {}
+        ).get(
+            "id",
+            ""
+        )
+
+        payment.save(
+            update_fields=[
+                "checkout_session_id",
+                "checkout_url",
+                "payment_intent_id",
+                "updated_at",
+            ]
+        )
+
+        return redirect(payment.checkout_url)
+
+    except (
+        requests.RequestException,
+        ValueError,
+        KeyError,
+    ) as error:
+
+        payment.status = "failed"
+
+        payment.save(
+            update_fields=[
+                "status",
+                "updated_at",
+            ]
+        )
+
+        print("PayMongo checkout error:", error)
+
+        messages.error(
+            request,
+            "Payment service is temporarily unavailable."
+        )
+
+        return redirect("my_requests")
+
+
+@login_required(login_url="/login/")
+def payment_success(request):
+    request_id = request.GET.get("request_id")
+
+    document_request = get_object_or_404(
+        DocumentRequest,
+        id=request_id,
+        resident=request.user,
+    )
+
+    payment = DocumentPayment.objects.filter(
+        document_request=document_request,
+        status="pending",
+    ).exclude(
+        checkout_session_id=""
+    ).order_by(
+        "-created_at"
+    ).first()
+
+    if not payment:
+        already_paid = DocumentPayment.objects.filter(
+            document_request=document_request,
+            status="paid",
+        ).exists()
+
+        if already_paid:
+            messages.success(
+                request,
+                "Your payment has already been verified."
+            )
+        else:
+            messages.warning(
+                request,
+                "No pending payment was found. Please check My Requests."
+            )
+
+        return redirect("my_requests")
+
+    try:
+        response = requests.get(
+            (
+                "https://api.paymongo.com/v1/checkout_sessions/"
+                f"{payment.checkout_session_id}"
+            ),
+            auth=(settings.PAYMONGO_SECRET_KEY, ""),
+            timeout=30,
+        )
+
+        if response.status_code != 200:
+            messages.warning(
+                request,
+                "We could not verify your payment yet. "
+                "Please check again later."
+            )
+
+            return redirect("my_requests")
+
+        session_data = response.json()["data"]
+        attributes = session_data["attributes"]
+
+        # Make sure the PayMongo session is the one
+        # stored for this MahaServe payment.
+        if session_data["id"] != payment.checkout_session_id:
+            messages.error(
+                request,
+                "Payment verification failed."
+            )
+
+            return redirect("my_requests")
+
+        expected_amount = int(payment.amount * 100)
+
+        confirmed = any(
+            item.get("attributes", {}).get("status") == "paid"
+            and item.get("attributes", {}).get("amount") == expected_amount
+            and item.get("attributes", {}).get(
+                "currency",
+                ""
+            ).upper() == "PHP"
+            for item in attributes.get("payments", [])
+        )
+
+        if confirmed:
+            payment.status = "paid"
+
+            payment.save(
+                update_fields=[
+                    "status",
+                    "updated_at",
+                ]
+            )
+
+            messages.success(
+                request,
+                "Payment verified successfully!"
+            )
+
+        else:
+            messages.warning(
+                request,
+                "PayMongo has not confirmed your payment yet. "
+                "Your payment status has not been changed."
+            )
+
+    except (
+        requests.RequestException,
+        ValueError,
+        KeyError,
+    ) as error:
+
+        print("PayMongo verification error:", error)
+
+        messages.warning(
+            request,
+            "We could not verify your payment right now. "
+            "Please try again later."
+        )
+
+    return redirect("my_requests")
+
+
+@login_required(login_url="/login/")
+def payment_cancel(request):
+    messages.info(
+        request,
+        "Checkout was cancelled. "
+        "Your document request remains unchanged."
+    )
+
+    return redirect("my_requests")
 
 # ==========================================
 # STAFF / ADMIN DASHBOARD
@@ -309,26 +642,74 @@ def update_request(request, request_id):
     if old_status != new_status:
         recipient_email = document_request.resident.email
 
+        # Create a status-specific message.
+        if new_status == "pending":
+            status_message = (
+                "Your document request has been submitted and is "
+                "waiting for review by the barangay staff."
+            )
+
+        elif new_status == "under_review":
+            status_message = (
+                "The barangay staff is currently reviewing your "
+                "document request. Please wait for further updates."
+            )
+
+        elif new_status == "approved":
+            status_message = (
+                "Good news! Your document request has been approved. "
+                "Please log in to MahaServe to check the next steps."
+            )
+
+        elif new_status == "rejected":
+            status_message = (
+                "Unfortunately, your document request has been rejected. "
+                "Please review the staff remarks below or contact "
+                "Barangay Mahayahay for clarification."
+            )
+
+        elif new_status == "released":
+            status_message = (
+                "Your document is ready for collection! Please visit "
+                "Barangay Mahayahay Hall to claim your document. "
+                "Bring a valid ID and your request details. "
+                "Please coordinate with the barangay staff regarding "
+                "collection hours."
+            )
+
+        else:
+            status_message = (
+                "Your document request status has been updated. "
+                "Please log in to MahaServe to view the latest information."
+            )
+
         if settings.RESEND_API_KEY and recipient_email:
             try:
                 resend.api_key = settings.RESEND_API_KEY
+
+                email_text = (
+                    f"Hello {document_request.resident.username},\n\n"
+                    f"Your request for "
+                    f"{document_request.document_type.name} has been updated.\n\n"
+                    f"Request status: {valid_statuses[new_status]}\n\n"
+                    f"{status_message}\n\n"
+                    f"Staff remarks: "
+                    f"{remarks or 'No additional remarks.'}\n\n"
+                    "You can log in to MahaServe to track your request.\n\n"
+                    "Thank you,\n"
+                    "MahaServe\n"
+                    "Barangay Mahayahay Document Request System"
+                )
 
                 resend.Emails.send({
                     "from": "onboarding@resend.dev",
                     "to": [recipient_email],
                     "subject": (
-                        f"MahaServe: Your {document_request.document_type.name} "
-                        "request has been updated"
+                        f"MahaServe: Your "
+                        f"{document_request.document_type.name} "
+                        f"request is {valid_statuses[new_status]}"
                     ),
-                    "text": (
-                        f"Hello {document_request.resident.username},\n\n"
-                        f"Your request for "
-                        f"{document_request.document_type.name} has been updated.\n\n"
-                        f"New status: {valid_statuses[new_status]}\n"
-                        f"Staff remarks: {remarks or 'No additional remarks.'}\n\n"
-                        "Please log in to MahaServe to track your request.\n\n"
-                        "Thank you,\nMahaServe"
-                    ),
+                    "text": email_text,
                 })
 
             except Exception as e:
@@ -340,7 +721,15 @@ def update_request(request, request_id):
                     "could not be sent. Check the terminal for details.",
                 )
 
+        elif not recipient_email:
+            messages.warning(
+                request,
+                "The request was updated, but the resident has no email "
+                "address registered.",
+            )
+
     return redirect("manage_requests")
+
 
 
 # ==========================================
@@ -536,3 +925,157 @@ def toggle_document_availability(request, document_id):
     )
 
     return redirect("manage_documents")
+
+
+@login_required(login_url="/login/")
+def resident_profile(request):
+    if request.user.is_staff:
+        return redirect("admin_dashboard")
+
+    profile, created = ResidentProfile.objects.get_or_create(
+        user=request.user
+    )
+
+    if request.method == "POST":
+        contact_number = request.POST.get("contact_number", "").strip()
+        house_number = request.POST.get("house_number", "").strip()
+        street = request.POST.get("street", "").strip()
+        purok = request.POST.get("purok", "").strip()
+        date_of_birth = request.POST.get("date_of_birth", "").strip()
+        sex = request.POST.get("sex", "").strip()
+
+        if sex and sex not in ["male", "female", "prefer_not_to_say"]:
+            messages.error(request, "Please select a valid sex option.")
+        else:
+            from datetime import date
+
+            parsed_date = None
+            if date_of_birth:
+                try:
+                    parsed_date = date.fromisoformat(date_of_birth)
+                    if parsed_date > date.today():
+                        messages.error(
+                            request,
+                            "Date of birth cannot be in the future."
+                        )
+                        return render(
+                            request,
+                            "documents/resident_profile.html",
+                            {"profile": profile},
+                        )
+                except ValueError:
+                    messages.error(
+                        request,
+                        "Please enter a valid date of birth."
+                    )
+                    return render(
+                        request,
+                        "documents/resident_profile.html",
+                        {"profile": profile},
+                    )
+
+            profile.contact_number = contact_number
+            profile.house_number = house_number
+            profile.street = street
+            profile.purok = purok
+            profile.date_of_birth = parsed_date
+            profile.sex = sex
+            profile.save()
+
+            messages.success(request, "Your profile has been updated!")
+            return redirect("resident_profile")
+
+    return render(
+        request,
+        "documents/resident_profile.html",
+        {"profile": profile},
+    )
+
+@login_required(login_url="/login/")
+def my_requests(request):
+    if request.user.is_staff:
+        return redirect("admin_dashboard")
+
+    requests = DocumentRequest.objects.filter(
+        resident=request.user
+    ).select_related(
+        "document_type"
+    ).order_by("-submitted_at")
+
+    return render(
+        request,
+        "documents/my_requests.html",
+        {
+            "requests": requests,
+        }
+    )
+
+
+@login_required(login_url="/login/")
+def ai_assistant(request):
+    answer = ""
+    question = ""
+
+    if request.method == "POST":
+        question = request.POST.get("question", "").strip()
+
+        if not question:
+            messages.error(request, "Please enter your question.")
+
+        else:
+            try:
+                client = Groq(api_key=settings.GROQ_API_KEY)
+
+                response = client.chat.completions.create(
+                    model="openai/gpt-oss-20b",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": (
+                                "You are MahaServe Assistant, a helpful AI "
+                                "assistant for the Barangay Mahayahay "
+                                "Document Request System in the Philippines. "
+                                "Answer questions about registering, logging "
+                                "in, requesting barangay documents, fees, "
+                                "payments, request statuses, and collecting "
+                                "released documents. Keep answers simple, "
+                                "polite, and concise. Explain that fees depend "
+                                "on the document type shown in MahaServe. "
+                                "Residents should check My Requests for their "
+                                "actual request status. When a document is "
+                                "released, instruct the resident to visit "
+                                "Barangay Mahayahay Hall and bring a valid ID. "
+                                "Never invent official fees, requirements, "
+                                "processing times, or barangay policies. "
+                                "If you do not know an official detail, advise "
+                                "the resident to contact barangay staff. "
+                                "Do not claim to access the user's account, "
+                                "database, or live request status."
+                            ),
+                        },
+                        {
+                            "role": "user",
+                            "content": question,
+                        },
+                    ],
+                )
+
+                answer = response.choices[0].message.content or (
+                    "Sorry, I couldn't generate an answer. Please try again."
+                )
+
+            except Exception:
+                messages.error(
+                    request,
+                    "The AI assistant is temporarily unavailable. "
+                    "Please try again later.",
+                )
+
+    return render(
+        request,
+        "documents/ai_assistant.html",
+        {
+            "answer": answer,
+            "question": question,
+        },
+    )

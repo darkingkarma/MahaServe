@@ -1,0 +1,238 @@
+
+{% extends "documents/resident_base.html" %}
+
+{% block title %}MahaServe | My Profile{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 760px;
+        margin: 0 auto;
+    }
+
+    .page-heading {
+        margin-bottom: 22px;
+    }
+
+    .page-heading h1 {
+        margin-bottom: 8px;
+        color: #14284b;
+    }
+
+    .page-heading p {
+        color: #64718a;
+        line-height: 1.5;
+    }
+
+    .profile-card {
+        background: white;
+        padding: 30px;
+        border-radius: 14px;
+        box-shadow: 0 8px 30px #14284b0d;
+    }
+
+    .account-info {
+        background: #f4f6fb;
+        border-radius: 9px;
+        padding: 15px;
+        margin-bottom: 25px;
+    }
+
+    .account-info p {
+        margin: 7px 0;
+        overflow-wrap: anywhere;
+    }
+
+    .profile-card h2 {
+        color: #14284b;
+        font-size: 18px;
+        margin-top: 26px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e3e8f1;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+
+    .profile-card label {
+        display: block;
+        margin: 17px 0 7px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .profile-card input,
+    .profile-card select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #d7ddea;
+        border-radius: 7px;
+        background: white;
+        color: #17233c;
+        font-size: 15px;
+    }
+
+    .profile-card input:focus,
+    .profile-card select:focus {
+        outline: 2px solid #b8c9ec;
+        border-color: #294d85;
+    }
+
+    .save-button {
+        width: 100%;
+        margin-top: 28px;
+        padding: 14px;
+        background: #14284b;
+        border: none;
+        border-radius: 7px;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .save-button:hover {
+        background: #203d6b;
+    }
+
+    .note {
+        color: #64718a;
+        font-size: 13px;
+        line-height: 1.5;
+        margin-top: 18px;
+    }
+
+    @media (max-width: 520px) {
+        .profile-card {
+            padding: 21px;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="page-heading">
+        <h1>My Profile</h1>
+        <p>View and update your resident information.</p>
+    </div>
+
+    <section class="profile-card">
+        <h2>Account Information</h2>
+
+        <div class="account-info">
+            <p>
+                <strong>Username:</strong>
+                {{ request.user.username }}
+            </p>
+            <p>
+                <strong>Email:</strong>
+                {{ request.user.email|default:"Not provided" }}
+            </p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <h2>Resident Information</h2>
+
+            <label for="contact_number">Contact Number</label>
+            <input
+                type="tel"
+                id="contact_number"
+                name="contact_number"
+                maxlength="20"
+                value="{{ profile.contact_number }}"
+                placeholder="e.g. 09XXXXXXXXX"
+            >
+
+            <div class="form-row">
+                <div>
+                    <label for="house_number">House Number</label>
+                    <input
+                        type="text"
+                        id="house_number"
+                        name="house_number"
+                        maxlength="100"
+                        value="{{ profile.house_number }}"
+                        placeholder="House or lot number"
+                    >
+                </div>
+
+                <div>
+                    <label for="street">Street</label>
+                    <input
+                        type="text"
+                        id="street"
+                        name="street"
+                        maxlength="150"
+                        value="{{ profile.street }}"
+                        placeholder="Street name"
+                    >
+                </div>
+            </div>
+
+            <label for="purok">Purok</label>
+            <input
+                type="text"
+                id="purok"
+                name="purok"
+                maxlength="100"
+                value="{{ profile.purok }}"
+                placeholder="Enter your purok"
+            >
+
+            <div class="form-row">
+                <div>
+                    <label for="date_of_birth">Date of Birth</label>
+                    <input
+                        type="date"
+                        id="date_of_birth"
+                        name="date_of_birth"
+                        value="{{ profile.date_of_birth|date:'Y-m-d' }}"
+                    >
+                </div>
+
+                <div>
+                    <label for="sex">Sex</label>
+                    <select id="sex" name="sex">
+                        <option value="">Select an option</option>
+
+                        <option value="male"
+                            {% if profile.sex == "male" %}selected{% endif %}>
+                            Male
+                        </option>
+
+                        <option value="female"
+                            {% if profile.sex == "female" %}selected{% endif %}>
+                            Female
+                        </option>
+
+                        <option value="prefer_not_to_say"
+                            {% if profile.sex == "prefer_not_to_say" %}selected{% endif %}>
+                            Prefer not to say
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="save-button" type="submit">
+                Save Profile Changes
+            </button>
+
+            <p class="note">
+                Keep your contact and address information up to date
+                to help with your barangay document requests.
+            </p>
+        </form>
+    </section>
+</div>
+{% endblock %}

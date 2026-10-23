@@ -1,0 +1,201 @@
+
+{% extends "documents/resident_base.html" %}
+
+{% block content %}
+<style>
+    .assistant-container {
+        max-width: 850px;
+        margin: 30px auto;
+        padding: 20px;
+    }
+
+    .assistant-header {
+        background: #2563eb;
+        color: white;
+        padding: 25px;
+        border-radius: 14px 14px 0 0;
+    }
+
+    .assistant-header h2 {
+        margin: 0 0 8px;
+    }
+
+    .assistant-header p {
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .chat-box {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-top: none;
+        padding: 25px;
+        min-height: 280px;
+        border-radius: 0 0 14px 14px;
+        box-shadow: 0 5px 18px rgba(0, 0, 0, 0.05);
+    }
+
+    .welcome-message {
+        background: #eff6ff;
+        padding: 16px;
+        border-radius: 10px;
+        color: #1e40af;
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+
+    .question-label {
+        font-weight: bold;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .question-input {
+        width: 100%;
+        min-height: 100px;
+        padding: 13px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font: inherit;
+        resize: vertical;
+        box-sizing: border-box;
+    }
+
+    .ask-button {
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 22px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 12px;
+    }
+
+    .ask-button:hover {
+        background: #1d4ed8;
+    }
+
+    .answer-box {
+        background: #f0fdf4;
+        border-left: 4px solid #16a34a;
+        border-radius: 8px;
+        padding: 18px;
+        margin-top: 25px;
+        line-height: 1.7;
+        overflow-wrap: anywhere;
+    }
+
+    .answer-box h3 {
+        margin-top: 0;
+        color: #166534;
+    }
+
+    .suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 18px;
+    }
+
+    .suggestions button {
+        background: #f3f4f6;
+        border: 1px solid #d1d5db;
+        border-radius: 20px;
+        padding: 9px 13px;
+        cursor: pointer;
+        color: #374151;
+    }
+
+    .suggestions button:hover {
+        background: #dbeafe;
+    }
+
+    .disclaimer {
+        font-size: 13px;
+        color: #6b7280;
+        margin-top: 20px;
+    }
+</style>
+
+<div class="assistant-container">
+
+    <div class="assistant-header">
+        <h2>🤖 MahaServe AI Assistant</h2>
+        <p>Your assistant for barangay document requests and services.</p>
+    </div>
+
+    <div class="chat-box">
+
+        <div class="welcome-message">
+            <strong>Hello!</strong> How can I help you today?
+            Ask me about document requests, fees, payments,
+            request statuses, or collecting released documents.
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <label class="question-label" for="question">
+                Enter your question
+            </label>
+
+            <textarea
+                class="question-input"
+                id="question"
+                name="question"
+                placeholder="Example: How can I request a barangay certificate?"
+                required
+                maxlength="2000"
+            >{{ question }}</textarea>
+
+            <button class="ask-button" type="submit">
+                Ask MahaServe AI
+            </button>
+        </form>
+
+        <div class="suggestions">
+            <button type="button"
+                onclick="askQuestion('How do I request a barangay document?')">
+                How do I request a document?
+            </button>
+
+            <button type="button"
+                onclick="askQuestion('How can I pay for my document request?')">
+                How do I pay?
+            </button>
+
+            <button type="button"
+                onclick="askQuestion('What should I do when my request is released?')">
+                How do I claim my document?
+            </button>
+
+            <button type="button"
+                onclick="askQuestion('How can I check my request status?')">
+                Check request status
+            </button>
+        </div>
+
+        {% if answer %}
+            <div class="answer-box">
+                <h3>🤖 MahaServe's Answer</h3>
+                {{ answer|linebreaksbr }}
+            </div>
+        {% endif %}
+
+        <p class="disclaimer">
+            AI-generated answers may not always be accurate.
+            For official requirements, fees, and policies,
+            please confirm with barangay staff.
+        </p>
+
+    </div>
+</div>
+
+<script>
+    function askQuestion(question) {
+        document.getElementById("question").value = question;
+        document.getElementById("question").form.requestSubmit();
+    }
+</script>
+{% endblock %}

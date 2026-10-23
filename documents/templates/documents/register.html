@@ -5,8 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MahaServe | Create Account</title>
+
     <style>
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             margin: 0;
@@ -22,7 +25,7 @@
 
         .container {
             width: 100%;
-            max-width: 440px;
+            max-width: 540px;
             background: white;
             padding: 36px;
             border-radius: 16px;
@@ -42,6 +45,20 @@
             margin-bottom: 28px;
         }
 
+        .section-title {
+            margin-top: 28px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e3e8f1;
+            color: #14284b;
+            font-size: 17px;
+        }
+
+        .section-description {
+            color: #64718a;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
         label {
             display: block;
             margin: 16px 0 7px;
@@ -49,22 +66,32 @@
             font-weight: bold;
         }
 
-        input {
+        input,
+        select {
             width: 100%;
             padding: 12px;
             border: 1px solid #d7ddea;
             border-radius: 7px;
             font-size: 15px;
+            background: white;
+            color: #17233c;
         }
 
-        input:focus {
+        input:focus,
+        select:focus {
             outline: 2px solid #b8c9ec;
             border-color: #294d85;
         }
 
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
         button {
             width: 100%;
-            margin-top: 24px;
+            margin-top: 28px;
             padding: 13px;
             border: 0;
             border-radius: 7px;
@@ -75,7 +102,9 @@
             cursor: pointer;
         }
 
-        button:hover { background: #203d6b; }
+        button:hover {
+            background: #203d6b;
+        }
 
         .messages {
             padding: 11px;
@@ -93,7 +122,9 @@
             line-height: 2;
         }
 
-        a { color: #244e89; }
+        a {
+            color: #244e89;
+        }
 
         .back {
             display: block;
@@ -101,8 +132,20 @@
             margin-top: 18px;
             color: #64718a;
         }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 24px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+        }
     </style>
 </head>
+
 <body>
     <main class="container">
         <div class="brand">MahaServe</div>
@@ -117,7 +160,9 @@
         <form method="post">
             {% csrf_token %}
 
-            <label for="username">Username</label>
+            <h3 class="section-title">Account Information</h3>
+
+            <label for="username">Username *</label>
             <input
                 type="text"
                 id="username"
@@ -127,7 +172,7 @@
                 required
             >
 
-            <label for="email">Email address</label>
+            <label for="email">Email Address *</label>
             <input
                 type="email"
                 id="email"
@@ -136,23 +181,106 @@
                 required
             >
 
-            <label for="password">Password</label>
+            <div class="form-row">
+                <div>
+                    <label for="password">Password *</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        minlength="8"
+                        autocomplete="new-password"
+                        required
+                    >
+                </div>
+
+                <div>
+                    <label for="confirm_password">Confirm Password *</label>
+                    <input
+                        type="password"
+                        id="confirm_password"
+                        name="confirm_password"
+                        minlength="8"
+                        autocomplete="new-password"
+                        required
+                    >
+                </div>
+            </div>
+
+            <h3 class="section-title">Resident Information</h3>
+            <p class="section-description">
+                Provide your contact and address details for document
+                requests. You can leave these fields blank and update
+                them later.
+            </p>
+
+            <label for="contact_number">Contact Number</label>
             <input
-                type="password"
-                id="password"
-                name="password"
-                autocomplete="new-password"
-                required
+                type="tel"
+                id="contact_number"
+                name="contact_number"
+                maxlength="20"
+                autocomplete="tel"
+                placeholder="e.g. 09XXXXXXXXX"
             >
 
-            <label for="confirm_password">Confirm password</label>
+            <div class="form-row">
+                <div>
+                    <label for="house_number">House Number</label>
+                    <input
+                        type="text"
+                        id="house_number"
+                        name="house_number"
+                        maxlength="100"
+                        autocomplete="address-line2"
+                        placeholder="House or lot number"
+                    >
+                </div>
+
+                <div>
+                    <label for="street">Street</label>
+                    <input
+                        type="text"
+                        id="street"
+                        name="street"
+                        maxlength="150"
+                        autocomplete="address-line1"
+                        placeholder="Street name"
+                    >
+                </div>
+            </div>
+
+            <label for="purok">Purok</label>
             <input
-                type="password"
-                id="confirm_password"
-                name="confirm_password"
-                autocomplete="new-password"
-                required
+                type="text"
+                id="purok"
+                name="purok"
+                maxlength="100"
+                placeholder="Enter your purok"
             >
+
+            <div class="form-row">
+                <div>
+                    <label for="date_of_birth">Date of Birth</label>
+                    <input
+                        type="date"
+                        id="date_of_birth"
+                        name="date_of_birth"
+                    >
+                </div>
+
+                <div>
+                    <label for="sex">Sex</label>
+                    <select id="sex" name="sex">
+                        <option value="">Select an option</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="prefer_not_to_say">
+                            Prefer not to say
+                        </option>
+                    </select>
+                </div>
+            </div>
 
             <button type="submit">Create Account</button>
         </form>
