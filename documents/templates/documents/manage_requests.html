@@ -1,214 +1,781 @@
-
 {% extends "documents/base.html" %}
 
 {% block title %}Manage Requests | MahaServe{% endblock %}
-
 {% block page_heading %}Manage Document Requests{% endblock %}
 
 {% block content %}
 
 <style>
+    .requests-page {
+        width: 100%;
+        min-width: 0;
+        color: #172554;
+    }
+
     .page-intro {
-        margin-bottom: 25px;
+        margin-bottom: 24px;
     }
 
     .page-intro h1 {
         margin: 0 0 8px;
-        color: #172554;
+        font-size: clamp(23px, 3vw, 30px);
+        font-weight: 750;
+        letter-spacing: -0.7px;
     }
 
     .page-intro p {
         margin: 0;
         color: #64748b;
-        line-height: 1.6;
+        font-size: 14px;
+        line-height: 1.7;
     }
 
-    .table-panel {
+    .filter-panel {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding: 18px;
+        background: #fff;
+        border: 1px solid #e8edf5;
+        border-radius: 14px;
+        box-shadow: 0 3px 12px rgba(23, 37, 84, 0.04);
+    }
+
+    .filter-form {
+        display: flex;
+        flex: 1;
+        flex-wrap: wrap;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    .search-input,
+    .filter-select {
+        min-height: 43px;
+        padding: 10px 12px;
+        border: 1px solid #dbe2ed;
+        border-radius: 8px;
+        background: #fff;
+        color: #172554;
+        font-family: Arial, sans-serif;
+        font-size: 13px;
+        outline: none;
+    }
+
+    .search-input {
+        flex: 1;
+        min-width: 180px;
+    }
+
+    .filter-select {
+        min-width: 155px;
+    }
+
+    .search-input:focus,
+    .filter-select:focus,
+    .request-form select:focus,
+    .request-form textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+    }
+
+    .filter-button,
+    .reset-button {
+        display: inline-flex;
+        min-height: 43px;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .filter-button {
+        border: none;
+        background: #172554;
+        color: white;
+    }
+
+    .filter-button:hover {
+        background: #263d78;
+    }
+
+    .reset-button {
+        border: 1px solid #dbe2ed;
         background: white;
-        padding: 22px;
-        border-radius: 12px;
-        box-shadow: 0 3px 12px #17233c0b;
-        overflow-x: auto;
+        color: #475569;
     }
 
-    table {
-        width: 100%;
-        min-width: 1150px;
-        border-collapse: collapse;
-    }
-
-    th, td {
-        padding: 14px 12px;
-        border-bottom: 1px solid #e5e7eb;
-        text-align: left;
-        vertical-align: top;
-    }
-
-    th {
+    .reset-button:hover {
         background: #f8fafc;
+    }
+
+    .results-count {
         color: #64748b;
         font-size: 13px;
         white-space: nowrap;
     }
 
-    td {
-        font-size: 14px;
-        line-height: 1.6;
+    .table-panel {
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid #e8edf5;
+        border-radius: 14px;
+        box-shadow: 0 3px 12px rgba(23, 37, 84, 0.04);
     }
 
-    .status {
-        display: inline-block;
-        padding: 5px 10px;
-        border-radius: 20px;
-        background: #e8eef7;
-        color: #17365d;
+    .table-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 19px 22px;
+        border-bottom: 1px solid #edf1f7;
+    }
+
+    .table-heading h2 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 750;
+    }
+
+    .table-heading p {
+        margin: 5px 0 0;
+        color: #64748b;
         font-size: 12px;
-        font-weight: bold;
+    }
+
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .requests-table {
+        width: 100%;
+        min-width: 1050px;
+        border-collapse: collapse;
+    }
+
+    .requests-table th {
+        padding: 14px 15px;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 750;
+        text-align: left;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
         white-space: nowrap;
     }
 
-    .view-button {
-        display: inline-block;
-        padding: 8px 11px;
-        margin-bottom: 9px;
-        border-radius: 5px;
-        background: #2563eb;
-        color: white;
-        text-decoration: none;
+    .requests-table td {
+        padding: 16px 15px;
+        border-bottom: 1px solid #edf1f7;
+        color: #334155;
         font-size: 13px;
+        line-height: 1.6;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    .requests-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .requests-table tbody tr:hover {
+        background: #fbfdff;
+    }
+
+    .resident-name {
+        color: #172554;
+        font-weight: 750;
+        overflow-wrap: anywhere;
+    }
+
+    .document-name {
+        color: #334155;
+        font-weight: 650;
+    }
+
+    .date-text {
+        white-space: nowrap;
+        color: #64748b;
+    }
+
+    .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 9px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+    .status::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .status-pending {
+        background: #fff7df;
+        color: #a16207;
+    }
+
+    .status-under-review {
+        background: #eaf2ff;
+        color: #1d4ed8;
+    }
+
+    .status-approved {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-rejected {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .status-released {
+        background: #f3e8ff;
+        color: #7e22ce;
+    }
+
+    .remarks {
+        max-width: 190px;
+        color: #64748b;
+        overflow-wrap: anywhere;
+    }
+
+    .view-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        margin-bottom: 12px;
+        padding: 8px 11px;
+        border-radius: 7px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 12px;
+        font-weight: 750;
+        text-decoration: none;
         white-space: nowrap;
     }
 
     .view-button:hover {
-        background: #1d4ed8;
+        background: #dbeafe;
     }
 
     .request-form {
-        min-width: 190px;
+        width: 205px;
     }
 
     .request-form label {
         display: block;
         margin-bottom: 6px;
         color: #475569;
-        font-size: 12px;
-        font-weight: bold;
+        font-size: 11px;
+        font-weight: 750;
     }
 
     .request-form select,
     .request-form textarea {
         display: block;
         width: 100%;
-        padding: 9px;
         margin-bottom: 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 5px;
-        background: white;
+        padding: 10px;
+        border: 1px solid #dbe2ed;
+        border-radius: 7px;
+        background: #fff;
         color: #172554;
         font-family: Arial, sans-serif;
-        font-size: 13px;
+        font-size: 12px;
+        box-sizing: border-box;
+        outline: none;
     }
 
     .request-form textarea {
-        min-height: 80px;
+        min-height: 75px;
         resize: vertical;
+        line-height: 1.5;
     }
 
     .save-button {
+        display: inline-flex;
         width: 100%;
+        min-height: 38px;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
         padding: 10px 12px;
         border: none;
-        border-radius: 6px;
+        border-radius: 7px;
         background: #172554;
         color: white;
-        font-size: 13px;
+        font-size: 12px;
+        font-weight: 750;
         cursor: pointer;
+        transition: background 0.2s;
     }
 
     .save-button:hover {
-        background: #334155;
+        background: #263d78;
     }
 
     .empty {
-        padding: 30px;
-        text-align: center;
-        color: #64748b;
+        padding: 50px 20px !important;
+        color: #64748b !important;
+        text-align: center !important;
     }
 
-    .remarks {
-        min-width: 150px;
-        max-width: 240px;
+    .empty-icon {
+        display: flex;
+        width: 48px;
+        height: 48px;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 12px;
+        border-radius: 14px;
+        background: #f1f5f9;
+        color: #64748b;
+        font-size: 22px;
+    }
+
+    /* Mobile request cards */
+    .mobile-requests {
+        display: none;
+        padding: 14px;
+    }
+
+    .request-card {
+        margin-bottom: 14px;
+        padding: 16px;
+        border: 1px solid #e5eaf2;
+        border-radius: 12px;
+        background: #fff;
+    }
+
+    .request-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .request-card-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .request-card h3 {
+        margin: 0 0 5px;
+        color: #172554;
+        font-size: 15px;
         overflow-wrap: anywhere;
     }
 
-    @media (max-width: 600px) {
-        .table-panel {
-            padding: 12px;
+    .request-card .request-id {
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    .request-info {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 15px 12px;
+        margin-bottom: 16px;
+    }
+
+    .info-item {
+        min-width: 0;
+    }
+
+    .info-label {
+        display: block;
+        margin-bottom: 5px;
+        color: #94a3b8;
+        font-size: 10px;
+        font-weight: 750;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .info-value {
+        color: #334155;
+        font-size: 13px;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+    }
+
+    .mobile-remarks {
+        margin-bottom: 14px;
+        padding: 11px;
+        border-radius: 8px;
+        background: #f8fafc;
+    }
+
+    .mobile-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding-top: 14px;
+        border-top: 1px solid #edf1f7;
+    }
+
+    .mobile-actions .view-button {
+        width: 100%;
+        min-height: 42px;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    .mobile-actions .request-form {
+        width: 100%;
+    }
+
+    .mobile-actions .request-form select,
+    .mobile-actions .request-form textarea {
+        font-size: 14px;
+    }
+
+    @media (max-width: 850px) {
+        .filter-panel {
+            align-items: stretch;
         }
 
-        .page-intro h1 {
-            font-size: 23px;
+        .filter-form {
+            flex-basis: 100%;
+        }
+
+        .results-count {
+            white-space: normal;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .page-intro {
+            margin-bottom: 18px;
+        }
+
+        .page-intro p {
+            font-size: 13px;
+        }
+
+        .filter-panel {
+            padding: 14px;
+            border-radius: 12px;
+        }
+
+        .filter-form {
+            flex-direction: column;
+        }
+
+        .search-input,
+        .filter-select,
+        .filter-button,
+        .reset-button {
+            width: 100%;
+            min-width: 0;
+            min-height: 44px;
+            box-sizing: border-box;
+        }
+
+        .filter-form .filter-button,
+        .filter-form .reset-button {
+            flex: 1;
+        }
+
+        .filter-form .filter-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .table-heading {
+            padding: 16px;
+        }
+
+        .table-heading h2 {
+            font-size: 15px;
+        }
+
+        .desktop-requests {
+            display: none;
+        }
+
+        .mobile-requests {
+            display: block;
+        }
+
+        .request-card {
+            padding: 14px;
+        }
+
+        .request-card-top {
+            flex-direction: column;
+        }
+
+        .request-info {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .request-info {
+            grid-template-columns: 1fr;
         }
     }
 </style>
 
-<div class="page-intro">
-    <h1>Manage Document Requests</h1>
-    <p>
-        Review resident applications, inspect request details,
-        update statuses, and provide remarks.
-    </p>
-</div>
+<div class="requests-page">
 
-<div class="table-panel">
-    <table>
-        <thead>
-            <tr>
-                <th>Resident</th>
-                <th>Document</th>
-                <th>Purpose</th>
-                <th>Date Submitted</th>
-                <th>Current Status</th>
-                <th>Staff Remarks</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
+    <div class="page-intro">
+        <h1>Manage Document Requests</h1>
+        <p>
+            Review resident applications, update processing statuses,
+            and provide remarks to keep residents informed.
+        </p>
+    </div>
 
-        <tbody>
+    <!-- Search and filter -->
+    <div class="filter-panel">
+        <form method="GET" class="filter-form" id="filterForm">
+
+            <input
+                type="search"
+                name="q"
+                class="search-input"
+                placeholder="Search resident, document, or purpose..."
+                value="{{ request.GET.q|default:'' }}"
+                aria-label="Search document requests"
+            >
+
+            <select
+                name="status"
+                class="filter-select"
+                aria-label="Filter requests by status"
+            >
+                <option value="">All Statuses</option>
+
+                {% for value, label in status_choices %}
+                    <option
+                        value="{{ value }}"
+                        {% if request.GET.status == value %}selected{% endif %}
+                    >
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <div class="filter-actions">
+                <button type="submit" class="filter-button">
+                    Search
+                </button>
+
+                <a href="{% url 'manage_requests' %}" class="reset-button">
+                    Reset
+                </a>
+            </div>
+
+        </form>
+
+        <div class="results-count">
+            Showing {{ requests_list|length }} request{{ requests_list|length|pluralize }}
+        </div>
+    </div>
+
+    <div class="table-panel">
+
+        <div class="table-heading">
+            <div>
+                <h2>Document Requests</h2>
+                <p>View applications and manage their processing status.</p>
+            </div>
+        </div>
+
+        <!-- Desktop and tablet table -->
+        <div class="desktop-requests">
+            <div class="table-responsive">
+                <table class="requests-table">
+                    <thead>
+                        <tr>
+                            <th>Resident</th>
+                            <th>Document</th>
+                            <th>Purpose</th>
+                            <th>Date Submitted</th>
+                            <th>Status</th>
+                            <th>Staff Remarks</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for item in requests_list %}
+                            <tr>
+                                <td>
+                                    <div class="resident-name">
+                                        {{ item.resident.username }}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="document-name">
+                                        {{ item.document_type.name }}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    {{ item.purpose|truncatewords:12 }}
+                                </td>
+
+                                <td>
+                                    <span class="date-text">
+                                        {{ item.submitted_at|date:"M d, Y" }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="status status-{{ item.status|slugify }}">
+                                        {{ item.get_status_display }}
+                                    </span>
+                                </td>
+
+                                <td class="remarks">
+                                    {{ item.remarks|default:"No remarks yet." }}
+                                </td>
+
+                                <td>
+                                    <a
+                                        href="{% url 'request_details' item.id %}"
+                                        class="view-button"
+                                    >
+                                        View Details
+                                    </a>
+
+                                    <form
+                                        method="POST"
+                                        action="{% url 'update_request' item.id %}"
+                                        class="request-form"
+                                    >
+                                        {% csrf_token %}
+
+                                        <label for="status-{{ item.id }}">
+                                            Update Status
+                                        </label>
+
+                                        <select
+                                            id="status-{{ item.id }}"
+                                            name="status"
+                                            required
+                                        >
+                                            {% for value, label in status_choices %}
+                                                <option
+                                                    value="{{ value }}"
+                                                    {% if item.status == value %}selected{% endif %}
+                                                >
+                                                    {{ label }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+
+                                        <label for="remarks-{{ item.id }}">
+                                            Staff Remarks
+                                        </label>
+
+                                        <textarea
+                                            id="remarks-{{ item.id }}"
+                                            name="remarks"
+                                            placeholder="Enter remarks for the resident..."
+                                        >{{ item.remarks|default_if_none:"" }}</textarea>
+
+                                        <button type="submit" class="save-button">
+                                            Save Changes
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="empty">
+                                    <div class="empty-icon">📄</div>
+                                    <strong>No document requests found</strong>
+                                    <p>New resident applications will appear here.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile cards -->
+        <div class="mobile-requests">
             {% for item in requests_list %}
-                <tr>
-                    <td>
-                        {{ item.resident.username }}
-                    </td>
+                <article class="request-card">
 
-                    <td>
-                        {{ item.document_type.name }}
-                    </td>
+                    <div class="request-card-top">
+                        <div>
+                            <h3>{{ item.document_type.name }}</h3>
+                            <div class="request-id">
+                                Request #{{ item.id }} · {{ item.resident.username }}
+                            </div>
+                        </div>
 
-                    <td>
-                        {{ item.purpose|truncatewords:15 }}
-                    </td>
-
-                    <td>
-                        {{ item.submitted_at|date:"M d, Y" }}
-                    </td>
-
-                    <td>
-                        <span class="status">
+                        <span class="status status-{{ item.status|slugify }}">
                             {{ item.get_status_display }}
                         </span>
-                    </td>
+                    </div>
 
-                    <td class="remarks">
-                        {{ item.remarks|default:"No remarks yet." }}
-                    </td>
+                    <div class="request-info">
+                        <div class="info-item">
+                            <span class="info-label">Date Submitted</span>
+                            <div class="info-value">
+                                {{ item.submitted_at|date:"M d, Y" }}
+                            </div>
+                        </div>
 
-                    <td>
+                        <div class="info-item">
+                            <span class="info-label">Resident</span>
+                            <div class="info-value">
+                                {{ item.resident.username }}
+                            </div>
+                        </div>
+
+                        <div class="info-item" style="grid-column: 1 / -1;">
+                            <span class="info-label">Purpose</span>
+                            <div class="info-value">
+                                {{ item.purpose|default:"No purpose provided." }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mobile-remarks">
+                        <span class="info-label">Staff Remarks</span>
+                        <div class="info-value">
+                            {{ item.remarks|default:"No remarks yet." }}
+                        </div>
+                    </div>
+
+                    <div class="mobile-actions">
                         <a
                             href="{% url 'request_details' item.id %}"
                             class="view-button"
                         >
-                            View Details
+                            View Request Details
                         </a>
 
                         <form
@@ -218,12 +785,12 @@
                         >
                             {% csrf_token %}
 
-                            <label for="status-{{ item.id }}">
+                            <label for="mobile-status-{{ item.id }}">
                                 Update Status
                             </label>
 
                             <select
-                                id="status-{{ item.id }}"
+                                id="mobile-status-{{ item.id }}"
                                 name="status"
                                 required
                             >
@@ -237,34 +804,34 @@
                                 {% endfor %}
                             </select>
 
-                            <label for="remarks-{{ item.id }}">
+                            <label for="mobile-remarks-{{ item.id }}">
                                 Staff Remarks
                             </label>
 
                             <textarea
-                                id="remarks-{{ item.id }}"
+                                id="mobile-remarks-{{ item.id }}"
                                 name="remarks"
                                 placeholder="Enter remarks for the resident..."
-                            >{{ item.remarks }}</textarea>
+                            >{{ item.remarks|default_if_none:"" }}</textarea>
 
-                            <button
-                                type="submit"
-                                class="save-button"
-                            >
+                            <button type="submit" class="save-button">
                                 Save Changes
                             </button>
                         </form>
-                    </td>
-                </tr>
+                    </div>
+
+                </article>
             {% empty %}
-                <tr>
-                    <td colspan="7" class="empty">
-                        No document requests found yet.
-                    </td>
-                </tr>
+                <div class="empty">
+                    <div class="empty-icon">📄</div>
+                    <strong>No document requests found</strong>
+                    <p>New resident applications will appear here.</p>
+                </div>
             {% endfor %}
-        </tbody>
-    </table>
+        </div>
+
+    </div>
+
 </div>
 
 {% endblock %}

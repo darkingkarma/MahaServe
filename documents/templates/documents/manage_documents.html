@@ -1,3 +1,4 @@
+
 {% extends "documents/base.html" %}
 
 {% block title %}Manage Documents | MahaServe{% endblock %}
@@ -7,65 +8,200 @@
 {% block content %}
 
 <style>
+    .manage-documents {
+        width: 100%;
+        min-width: 0;
+        color: #17233c;
+    }
+
     .page-intro {
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
         gap: 15px;
-        margin-bottom: 25px;
+        margin-bottom: 24px;
     }
 
     .page-intro h1 {
         margin: 0 0 8px;
+        font-size: clamp(22px, 3vw, 28px);
     }
 
     .page-intro p {
         margin: 0;
         color: #64748b;
+        line-height: 1.5;
     }
 
-    .table-panel {
+    .btn-add {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 11px 16px;
+        background: #f5c542;
+        color: #17233c;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 14px;
+        white-space: nowrap;
+        transition: background 0.2s;
+    }
+
+    .btn-add:hover {
+        background: #eab308;
+    }
+
+    /* Search and filter */
+    .filter-panel {
         background: white;
-        padding: 22px;
+        padding: 20px;
         border-radius: 12px;
         box-shadow: 0 3px 12px #17233c0b;
+        margin-bottom: 20px;
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 220px auto;
+        gap: 14px;
+        align-items: end;
+    }
+
+    .filter-field label {
+        display: block;
+        margin-bottom: 7px;
+        color: #475569;
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    .filter-field input,
+    .filter-field select {
+        width: 100%;
+        min-width: 0;
+        min-height: 44px;
+        padding: 10px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: white;
+        color: #17233c;
+        font-size: 14px;
+        outline: none;
+    }
+
+    .filter-field input:focus,
+    .filter-field select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px #2563eb20;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-search,
+    .btn-reset {
+        min-height: 44px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .btn-search {
+        border: 1px solid #14284b;
+        background: #14284b;
+        color: white;
+    }
+
+    .btn-search:hover {
+        background: #294873;
+    }
+
+    .btn-reset {
+        border: 1px solid #cbd5e1;
+        background: white;
+        color: #475569;
+    }
+
+    .btn-reset:hover {
+        background: #f1f5f9;
+    }
+
+    .result-count {
+        margin: 16px 0 0;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    /* Desktop table */
+    .table-panel {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px #17233c0b;
+        overflow: hidden;
+    }
+
+    .table-scroll {
+        width: 100%;
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     table {
         width: 100%;
-        min-width: 850px;
+        min-width: 760px;
         border-collapse: collapse;
     }
 
-    th, td {
-        padding: 14px;
+    th,
+    td {
+        padding: 14px 12px;
         border-bottom: 1px solid #e5e7eb;
         text-align: left;
         vertical-align: middle;
+        overflow-wrap: anywhere;
     }
 
     th {
         background: #f8fafc;
         color: #64748b;
-        font-size: 13px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+    }
+
+    tbody tr:hover {
+        background: #fafcff;
     }
 
     .document-image {
-        width: 75px;
-        height: 75px;
+        display: block;
+        width: 66px;
+        height: 66px;
         object-fit: contain;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
         padding: 4px;
-        background: #fff;
+        background: white;
     }
 
     .no-image {
         display: flex;
-        width: 75px;
-        height: 75px;
+        width: 66px;
+        height: 66px;
         align-items: center;
         justify-content: center;
         text-align: center;
@@ -76,12 +212,32 @@
         font-size: 11px;
     }
 
+    .document-name {
+        font-weight: bold;
+        color: #17233c;
+    }
+
+    .description {
+        max-width: 280px;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .fee {
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
     .availability {
-        display: inline-block;
-        padding: 5px 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
         border-radius: 20px;
         font-size: 12px;
         font-weight: bold;
+        white-space: nowrap;
     }
 
     .available {
@@ -94,9 +250,16 @@
         color: #991b1b;
     }
 
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
     .actions {
         display: flex;
-        gap: 8px;
+        gap: 7px;
         align-items: center;
         flex-wrap: wrap;
     }
@@ -105,52 +268,375 @@
         margin: 0;
     }
 
+    .btn-edit,
     .btn-delete {
-        background: #b91c1c;
-        color: white;
-        border: none;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        padding: 8px 11px;
+        border-radius: 7px;
+        font-size: 13px;
+        font-weight: bold;
+        text-decoration: none;
         cursor: pointer;
     }
 
+    .btn-edit {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1d4ed8;
+    }
+
+    .btn-edit:hover {
+        background: #dbeafe;
+    }
+
+    .btn-delete {
+        background: #fff1f2;
+        border: 1px solid #fecdd3;
+        color: #be123c;
+    }
+
     .btn-delete:hover {
-        background: #991b1b;
+        background: #ffe4e6;
     }
 
     .empty {
-        padding: 30px;
+        padding: 35px 20px;
         text-align: center;
         color: #64748b;
+        line-height: 1.6;
+    }
+
+    /* Mobile document cards */
+    .mobile-documents {
+        display: none;
+    }
+
+    .document-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 14px;
+        box-shadow: 0 3px 10px #17233c08;
+        min-width: 0;
+    }
+
+    .card-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+        min-width: 0;
+    }
+
+    .card-image {
+        flex-shrink: 0;
+    }
+
+    .card-heading {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .card-heading h3 {
+        margin: 2px 0 8px;
+        font-size: 16px;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    .card-description {
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.6;
+        margin: 14px 0;
+        overflow-wrap: anywhere;
+    }
+
+    .card-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 12px 0;
+        border-top: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .card-fee-label {
+        display: block;
+        margin-bottom: 4px;
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .card-fee {
+        font-size: 17px;
+        font-weight: bold;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 9px;
+        margin-top: 14px;
+    }
+
+    .card-actions > * {
+        flex: 1;
+    }
+
+    .card-actions .btn-edit,
+    .card-actions .btn-delete {
+        width: 100%;
+        min-height: 42px;
+        box-sizing: border-box;
+    }
+
+    .card-actions form {
+        margin: 0;
+    }
+
+    .empty-mobile {
+        padding: 30px 18px;
+        text-align: center;
+        background: white;
+        color: #64748b;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 900px) {
+        .filter-grid {
+            grid-template-columns: minmax(0, 1fr) minmax(160px, 0.7fr);
+        }
+
+        .filter-actions {
+            grid-column: 1 / -1;
+        }
+
+        .filter-actions button,
+        .filter-actions a {
+            flex: 1;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .page-intro {
+            align-items: stretch;
+        }
+
+        .page-intro .btn-add {
+            width: 100%;
+        }
+
+        .filter-panel {
+            padding: 15px;
+        }
+
+        .filter-grid {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 13px;
+        }
+
+        .filter-actions {
+            grid-column: auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .filter-actions button,
+        .filter-actions a {
+            width: 100%;
+            padding: 10px 8px;
+        }
+
+        .table-panel {
+            display: none;
+        }
+
+        .mobile-documents {
+            display: block;
+        }
+
+        .result-count {
+            margin-top: 13px;
+        }
     }
 </style>
 
-<div class="page-intro">
-    <div>
-        <h1>Document Types</h1>
-        <p>Manage document details and availability for residents.</p>
+<div class="manage-documents">
+
+    <div class="page-intro">
+        <div>
+            <h1>Document Types</h1>
+            <p>Manage document details, fees, and availability for residents.</p>
+        </div>
+
+        <a href="{% url 'add_document' %}" class="btn-add">
+            <span aria-hidden="true">＋</span> Add Document
+        </a>
     </div>
 
-    <a href="{% url 'add_document' %}" class="btn btn-yellow">
-        + Add Document
-    </a>
-</div>
+    <!-- Search and status filter -->
+    <section class="filter-panel">
+        <form method="get" id="documentFilterForm">
+            <div class="filter-grid">
 
-<div class="table-panel">
-    <table>
-        <thead>
-            <tr>
-                <th>Image</th>
-                <th>Document Name</th>
-                <th>Description</th>
-                <th>Fee</th>
-                <th>Availability</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
+                <div class="filter-field">
+                    <label for="documentSearch">Search documents</label>
+                    <input
+                        type="search"
+                        id="documentSearch"
+                        name="q"
+                        value="{{ request.GET.q|default:'' }}"
+                        placeholder="Search name or description..."
+                    >
+                </div>
 
-        <tbody>
-            {% for document in document_types %}
-                <tr>
-                    <td>
+                <div class="filter-field">
+                    <label for="statusFilter">Availability</label>
+                    <select id="statusFilter" name="status">
+                        <option value="all"
+                            {% if request.GET.status == "all" or not request.GET.status %}selected{% endif %}>
+                            All documents
+                        </option>
+
+                        <option value="active"
+                            {% if request.GET.status == "active" %}selected{% endif %}>
+                            Active only
+                        </option>
+
+                        <option value="inactive"
+                            {% if request.GET.status == "inactive" %}selected{% endif %}>
+                            Inactive only
+                        </option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-search">
+                        Search / Filter
+                    </button>
+
+                    <a href="{% url 'manage_documents' %}" class="btn-reset">
+                        Reset
+                    </a>
+                </div>
+
+            </div>
+
+            <p class="result-count">
+                Showing {{ document_types|length }} document{{ document_types|length|pluralize }}.
+            </p>
+        </form>
+    </section>
+
+    <!-- Desktop and tablet table -->
+    <div class="table-panel">
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Document Name</th>
+                        <th>Description</th>
+                        <th>Fee</th>
+                        <th>Availability</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for document in document_types %}
+                        <tr>
+                            <td>
+                                {% if document.image %}
+                                    <img
+                                        src="{{ document.image.url }}"
+                                        alt="{{ document.name }}"
+                                        class="document-image"
+                                        loading="lazy"
+                                    >
+                                {% else %}
+                                    <div class="no-image">No image</div>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <div class="document-name">
+                                    {{ document.name }}
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="description">
+                                    {{ document.description|default:"No description" }}
+                                </div>
+                            </td>
+
+                            <td class="fee">
+                                ₱{{ document.fee|floatformat:2 }}
+                            </td>
+
+                            <td>
+                                {% if document.is_available %}
+                                    <span class="availability available">
+                                        <span class="status-dot"></span>
+                                        Active
+                                    </span>
+                                {% else %}
+                                    <span class="availability unavailable">
+                                        <span class="status-dot"></span>
+                                        Inactive
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <div class="actions">
+                                    <a
+                                        href="{% url 'edit_document' document.id %}"
+                                        class="btn-edit"
+                                    >
+                                        Edit
+                                    </a>
+
+                                    <form
+                                        method="POST"
+                                        action="{% url 'delete_document' document.id %}"
+                                        onsubmit="return confirm('Are you sure you want to delete this document type? This action cannot be undone.');"
+                                    >
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-delete">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="empty">
+                                No document types match your search or filter.
+                                Try changing your search or selecting All documents.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Mobile document cards -->
+    <div class="mobile-documents">
+        {% for document in document_types %}
+            <article class="document-card">
+
+                <div class="card-top">
+                    <div class="card-image">
                         {% if document.image %}
                             <img
                                 src="{{ document.image.url }}"
@@ -159,67 +645,69 @@
                                 loading="lazy"
                             >
                         {% else %}
-                            <div class="no-image">
-                                No image
-                            </div>
+                            <div class="no-image">No image</div>
                         {% endif %}
-                    </td>
+                    </div>
 
-                    <td>{{ document.name }}</td>
+                    <div class="card-heading">
+                        <h3>{{ document.name }}</h3>
 
-                    <td>
-                        {{ document.description|default:"No description" }}
-                    </td>
-
-                    <td>₱{{ document.fee|floatformat:2 }}</td>
-
-                    <td>
                         {% if document.is_available %}
                             <span class="availability available">
+                                <span class="status-dot"></span>
                                 Active
                             </span>
                         {% else %}
                             <span class="availability unavailable">
+                                <span class="status-dot"></span>
                                 Inactive
                             </span>
                         {% endif %}
-                    </td>
+                    </div>
+                </div>
 
-                    <td>
-                        <div class="actions">
-                            <a
-                                href="{% url 'edit_document' document.id %}"
-                                class="btn"
-                            >
-                                Edit
-                            </a>
+                <p class="card-description">
+                    {{ document.description|default:"No description available." }}
+                </p>
 
-                            <form
-                                method="POST"
-                                action="{% url 'delete_document' document.id %}"
-                                onsubmit="return confirm('Are you sure you want to delete {{ document.name|escapejs }}? This action cannot be undone.');"
-                            >
-                                {% csrf_token %}
+                <div class="card-details">
+                    <div>
+                        <span class="card-fee-label">Document Fee</span>
+                        <span class="card-fee">
+                            ₱{{ document.fee|floatformat:2 }}
+                        </span>
+                    </div>
+                </div>
 
-                                <button
-                                    type="submit"
-                                    class="btn btn-delete"
-                                >
-                                    Delete
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="6" class="empty">
-                        No document types found. Add your first document type.
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                <div class="card-actions">
+                    <a
+                        href="{% url 'edit_document' document.id %}"
+                        class="btn-edit"
+                    >
+                        Edit
+                    </a>
+
+                    <form
+                        method="POST"
+                        action="{% url 'delete_document' document.id %}"
+                        onsubmit="return confirm('Are you sure you want to delete this document type? This action cannot be undone.');"
+                    >
+                        {% csrf_token %}
+                        <button type="submit" class="btn-delete">
+                            Delete
+                        </button>
+                    </form>
+                </div>
+
+            </article>
+        {% empty %}
+            <div class="empty-mobile">
+                <strong>No documents found.</strong><br>
+                Try changing your search or selecting All documents.
+            </div>
+        {% endfor %}
+    </div>
+
 </div>
 
 {% endblock %}

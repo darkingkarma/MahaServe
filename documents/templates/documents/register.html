@@ -1,9 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>MahaServe | Create Account</title>
 
     <style>
@@ -13,129 +13,158 @@
 
         body {
             margin: 0;
+            padding: 20px;
             min-height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
-            padding: 24px;
+            align-items: center;
             font-family: Arial, sans-serif;
-            background: #f4f6fb;
-            color: #17233c;
+            background: #f4f6f9;
+            color: #333;
         }
 
         .container {
             width: 100%;
             max-width: 540px;
+            padding: 30px;
             background: white;
-            padding: 36px;
-            border-radius: 16px;
-            box-shadow: 0 8px 30px #14284b12;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
         }
 
         .brand {
-            color: #14284b;
-            font-size: 25px;
+            margin: 0;
+            color: #17365d;
+            font-size: 28px;
             font-weight: bold;
             text-align: center;
         }
 
         .subtitle {
+            margin: 8px 0 25px;
+            color: #777;
+            font-size: 14px;
             text-align: center;
-            color: #64718a;
-            margin-bottom: 28px;
         }
 
         .section-title {
-            margin-top: 28px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #e3e8f1;
-            color: #14284b;
+            margin: 26px 0 8px;
+            padding-bottom: 9px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #17365d;
             font-size: 17px;
         }
 
         .section-description {
-            color: #64718a;
+            margin: 10px 0 16px;
+            color: #777;
             font-size: 13px;
             line-height: 1.5;
         }
 
         label {
             display: block;
-            margin: 16px 0 7px;
+            margin: 15px 0 6px;
             font-size: 14px;
             font-weight: bold;
         }
 
         input,
         select {
+            display: block;
             width: 100%;
-            padding: 12px;
-            border: 1px solid #d7ddea;
-            border-radius: 7px;
-            font-size: 15px;
+            min-width: 0;
+            padding: 11px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
             background: white;
-            color: #17233c;
+            color: #333;
+            font-family: inherit;
+            font-size: 15px;
         }
 
         input:focus,
         select:focus {
-            outline: 2px solid #b8c9ec;
-            border-color: #294d85;
+            outline: none;
+            border-color: #17365d;
+            box-shadow: 0 0 0 2px rgba(23, 54, 93, 0.1);
         }
 
         .form-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 14px;
         }
 
         button {
             width: 100%;
-            margin-top: 28px;
+            margin-top: 26px;
             padding: 13px;
-            border: 0;
-            border-radius: 7px;
-            background: #14284b;
+            border: none;
+            border-radius: 6px;
+            background: #17365d;
             color: white;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             cursor: pointer;
         }
 
         button:hover {
-            background: #203d6b;
+            background: #102946;
         }
 
         .messages {
-            padding: 11px;
-            border-radius: 7px;
-            background: #fff1f0;
-            color: #a12622;
-            font-size: 14px;
             margin: 12px 0;
+            padding: 11px;
+            border-radius: 6px;
+            background: #fee2e2;
+            color: #b91c1c;
+            font-size: 14px;
+            line-height: 1.5;
         }
 
         .links {
             margin-top: 22px;
             text-align: center;
             font-size: 14px;
-            line-height: 2;
         }
 
-        a {
-            color: #244e89;
+        .links a,
+        .back {
+            color: #17365d;
+            text-decoration: none;
+        }
+
+        .links a {
+            font-weight: bold;
+        }
+
+        .links a:hover,
+        .back:hover {
+            text-decoration: underline;
         }
 
         .back {
             display: block;
+            margin-top: 16px;
+            color: #777;
+            font-size: 14px;
             text-align: center;
-            margin-top: 18px;
-            color: #64718a;
         }
 
         @media (max-width: 480px) {
+            body {
+                padding: 12px;
+                align-items: flex-start;
+            }
+
             .container {
-                padding: 24px;
+                margin: 10px 0;
+                padding: 22px 18px;
+            }
+
+            .brand {
+                font-size: 25px;
             }
 
             .form-row {
@@ -148,7 +177,7 @@
 
 <body>
     <main class="container">
-        <div class="brand">MahaServe</div>
+        <h1 class="brand">MahaServe</h1>
         <p class="subtitle">Create your resident account</p>
 
         {% if messages %}
@@ -169,6 +198,7 @@
                 name="username"
                 maxlength="150"
                 autocomplete="username"
+                placeholder="Enter a username"
                 required
             >
 
@@ -178,6 +208,7 @@
                 id="email"
                 name="email"
                 autocomplete="email"
+                placeholder="Enter your email"
                 required
             >
 
@@ -190,6 +221,7 @@
                         name="password"
                         minlength="8"
                         autocomplete="new-password"
+                        placeholder="At least 8 characters"
                         required
                     >
                 </div>
@@ -202,16 +234,17 @@
                         name="confirm_password"
                         minlength="8"
                         autocomplete="new-password"
+                        placeholder="Confirm password"
                         required
                     >
                 </div>
             </div>
 
             <h3 class="section-title">Resident Information</h3>
+
             <p class="section-description">
-                Provide your contact and address details for document
-                requests. You can leave these fields blank and update
-                them later.
+                These details are optional. You can complete your
+                profile later.
             </p>
 
             <label for="contact_number">Contact Number</label>
@@ -232,7 +265,6 @@
                         id="house_number"
                         name="house_number"
                         maxlength="100"
-                        autocomplete="address-line2"
                         placeholder="House or lot number"
                     >
                 </div>
@@ -290,7 +322,9 @@
             <a href="{% url 'login' %}">Log in</a>
         </div>
 
-        <a class="back" href="/">← Back to landing page</a>
+        <a class="back" href="{% url 'landing' %}">
+            Back to landing page
+        </a>
     </main>
 </body>
 </html>

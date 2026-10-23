@@ -7,71 +7,329 @@
 {% block content %}
 
 <style>
+    .form-container,
+    .form-container * {
+        box-sizing: border-box;
+    }
+
     .form-container {
-        max-width: 700px;
-        padding: 28px;
-        background: white;
+        width: 100%;
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 30px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
         border-radius: 12px;
-        box-shadow: 0 3px 12px #17233c0b;
+        box-shadow: 0 3px 12px rgba(23, 35, 60, 0.04);
+    }
+
+    .form-header {
+        margin-bottom: 28px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .form-header h2 {
+        margin: 0 0 8px;
+        color: #172554;
+        font-size: 24px;
+        line-height: 1.3;
     }
 
     .form-description {
-        margin-bottom: 25px;
+        margin: 0;
         color: #64748b;
+        font-size: 14px;
+        line-height: 1.6;
     }
 
     .form-group {
-        margin-bottom: 20px;
+        margin-bottom: 22px;
     }
 
-    .form-group label {
+    .form-group > label,
+    .field-label {
         display: block;
         margin-bottom: 8px;
-        font-weight: bold;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 600;
     }
 
-    .form-group input,
+    .required {
+        color: #dc2626;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="number"],
     .form-group textarea {
+        display: block;
         width: 100%;
-        padding: 12px;
+        min-height: 45px;
+        padding: 12px 14px;
         border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        font-size: 15px;
+        border-radius: 8px;
+        outline: none;
+        background: #ffffff;
+        color: #172033;
         font-family: inherit;
+        font-size: 14px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input[type="text"]:focus,
+    .form-group input[type="number"]:focus,
+    .form-group textarea:focus {
+        border-color: #172554;
+        box-shadow: 0 0 0 3px rgba(23, 37, 84, 0.1);
     }
 
     .form-group textarea {
         min-height: 130px;
         resize: vertical;
+        line-height: 1.6;
+    }
+
+    .form-group input[type="file"] {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+        background: #f8fafc;
+        color: #475569;
+        font-family: inherit;
+        font-size: 13px;
+    }
+
+    .form-group input[type="file"]::file-selector-button {
+        margin-right: 12px;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 6px;
+        background: #e2e8f0;
+        color: #172554;
+        font-weight: 600;
+        cursor: pointer;
     }
 
     .form-help {
         display: block;
-        margin-top: 6px;
+        margin-top: 7px;
         color: #64748b;
-        font-size: 13px;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    /* AVAILABILITY CARD */
+    .availability-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-top: 4px;
+        padding: 17px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: #f8fafc;
+    }
+
+    .availability-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .availability-title {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-bottom: 5px;
+        color: #172033;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .availability-description {
+        margin: 0;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .availability-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 8px;
+        border-radius: 20px;
+        background: #dcfce7;
+        color: #166534;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .availability-status.inactive {
+        background: #e2e8f0;
+        color: #475569;
+    }
+
+    /* TOGGLE SWITCH */
+    .toggle-control {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
+        cursor: pointer;
+    }
+
+    .toggle-control input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+    }
+
+    .toggle-track {
+        position: relative;
+        display: block;
+        width: 48px;
+        height: 27px;
+        border-radius: 30px;
+        background: #cbd5e1;
+        transition: background 0.2s;
+    }
+
+    .toggle-track::after {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 21px;
+        height: 21px;
+        border-radius: 50%;
+        background: #ffffff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        content: "";
+        transition: transform 0.2s;
+    }
+
+    .toggle-control input:checked + .toggle-track {
+        background: #16a34a;
+    }
+
+    .toggle-control input:checked + .toggle-track::after {
+        transform: translateX(21px);
+    }
+
+    .toggle-control input:focus-visible + .toggle-track {
+        outline: 3px solid rgba(23, 37, 84, 0.25);
+        outline-offset: 3px;
     }
 
     .form-actions {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
-        margin-top: 25px;
+        margin-top: 28px;
+        padding-top: 22px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .form-actions .btn {
+        min-height: 44px;
+        padding: 12px 18px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .form-actions button:disabled {
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+
+    /* TABLET AND MOBILE */
+    @media (max-width: 600px) {
+        .form-container {
+            padding: 20px 16px;
+            border-radius: 10px;
+        }
+
+        .form-header {
+            margin-bottom: 22px;
+            padding-bottom: 17px;
+        }
+
+        .form-header h2 {
+            font-size: 21px;
+        }
+
+        .form-description {
+            font-size: 13px;
+        }
+
+        .form-group {
+            margin-bottom: 19px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea {
+            font-size: 16px;
+        }
+
+        .availability-card {
+            padding: 14px 12px;
+            gap: 10px;
+        }
+
+        .availability-title {
+            font-size: 13px;
+        }
+
+        .availability-description {
+            font-size: 11px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .form-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .form-container {
+            padding: 16px 12px;
+        }
+
+        .availability-card {
+            align-items: flex-start;
+        }
     }
 </style>
 
 <div class="form-container">
-    <h2>New Document Type</h2>
 
-    <p class="form-description">
-        Add a document that residents can request through MahaServe.
-    </p>
+    <div class="form-header">
+        <h2>New Document Type</h2>
+        <p class="form-description">
+            Add a document that residents can request through MahaServe.
+        </p>
+    </div>
 
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
+        <!-- DOCUMENT NAME -->
         <div class="form-group">
-            <label for="name">Document Name</label>
+            <label for="name">
+                Document Name <span class="required">*</span>
+            </label>
 
             <input
                 type="text"
@@ -80,10 +338,12 @@
                 maxlength="100"
                 value="{{ request.POST.name|default:'' }}"
                 placeholder="e.g. Barangay Clearance"
+                autocomplete="off"
                 required
             >
         </div>
 
+        <!-- DESCRIPTION -->
         <div class="form-group">
             <label for="description">Description</label>
 
@@ -92,10 +352,17 @@
                 name="description"
                 placeholder="Explain what this document is for..."
             >{{ request.POST.description|default:'' }}</textarea>
+
+            <span class="form-help">
+                Briefly explain the purpose of this document.
+            </span>
         </div>
 
+        <!-- PROCESSING FEE -->
         <div class="form-group">
-            <label for="fee">Processing Fee (₱)</label>
+            <label for="fee">
+                Processing Fee (₱) <span class="required">*</span>
+            </label>
 
             <input
                 type="number"
@@ -113,23 +380,68 @@
             </span>
         </div>
 
+        <!-- DOCUMENT IMAGE -->
         <div class="form-group">
             <label for="image">Document Image (Optional)</label>
+
             <input
                 type="file"
                 id="image"
                 name="image"
                 accept="image/*"
             >
-            <small>Select an image from your computer.</small>
-        </div>
-        <div class="form-group">
-            <label>
-                <input type="checkbox" name="is_available" checked>
-                Active — residents can request this document
-            </label>
+
+            <span class="form-help">
+                Choose an image from your device.
+            </span>
         </div>
 
+        <!-- AVAILABILITY TOGGLE -->
+        <div class="form-group">
+            <span class="field-label">Document Availability</span>
+
+            <div class="availability-card">
+                <div class="availability-info">
+                    <div class="availability-title">
+                        <span id="availabilityText">Active</span>
+
+                        <span
+                            class="availability-status"
+                            id="availabilityBadge"
+                            aria-live="polite"
+                        >
+                            Available
+                        </span>
+                    </div>
+
+                    <p class="availability-description" id="availabilityDescription">
+                        Residents can request this document.
+                    </p>
+                </div>
+
+                <label class="toggle-control" for="is_available">
+                    <input
+                        type="checkbox"
+                        id="is_available"
+                        name="is_available"
+                        {% if request.method == "POST" %}
+                            {% if request.POST.is_available %}checked{% endif %}
+                        {% else %}
+                            checked
+                        {% endif %}
+                        aria-label="Toggle document availability"
+                    >
+
+                    <span class="toggle-track"></span>
+                </label>
+            </div>
+
+            <span class="form-help">
+                You can change this setting later when editing the document.
+            </span>
+        </div>
+
+        <!-- FORM ACTIONS -->
         <div class="form-actions">
             <button type="submit" class="btn btn-yellow">
                 Save Document
@@ -141,5 +453,33 @@
         </div>
     </form>
 </div>
+
+<script>
+    (function () {
+        const toggle = document.getElementById("is_available");
+        const title = document.getElementById("availabilityText");
+        const badge = document.getElementById("availabilityBadge");
+        const description = document.getElementById("availabilityDescription");
+
+        function updateAvailability() {
+            if (toggle.checked) {
+                title.textContent = "Active";
+                badge.textContent = "Available";
+                badge.classList.remove("inactive");
+                description.textContent =
+                    "Residents can request this document.";
+            } else {
+                title.textContent = "Inactive";
+                badge.textContent = "Unavailable";
+                badge.classList.add("inactive");
+                description.textContent =
+                    "Residents cannot request this document.";
+            }
+        }
+
+        toggle.addEventListener("change", updateAvailability);
+        updateAvailability();
+    })();
+</script>
 
 {% endblock %}

@@ -11,169 +11,247 @@
             box-sizing: border-box;
         }
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f6f9;
-            color: #172554;
+        :root {
+            --navy: #172554;
+            --navy-light: #263765;
+            --yellow: #facc15;
+            --page-bg: #f8fafc;
+            --text: #172033;
+            --muted: #64748b;
+            --border: #e2e8f0;
         }
 
-        /* FIXED SIDEBAR */
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--page-bg);
+            color: var(--text);
+        }
+
+        body.menu-open {
+            overflow: hidden;
+        }
+
+        button, input, select, textarea {
+            font: inherit;
+        }
+
+        a, button {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* DESKTOP SIDEBAR */
         .sidebar {
             position: fixed;
             top: 0;
             left: 0;
             width: 250px;
             height: 100vh;
-            background: #172554;
+            height: 100dvh;
+            background: var(--navy);
             color: white;
-            padding: 25px 15px;
+            padding: 24px 15px;
             overflow-y: auto;
-            z-index: 100;
+            z-index: 1000;
         }
 
         .brand {
-            padding: 0 12px 25px;
+            padding: 0 12px 24px;
             border-bottom: 1px solid #334155;
         }
 
         .brand h2 {
-            margin: 0 0 8px;
-            color: #facc15;
+            margin: 0 0 7px;
+            color: var(--yellow);
+            font-size: 23px;
         }
 
         .brand p {
             margin: 0;
-            font-size: 12px;
             color: #cbd5e1;
+            font-size: 12px;
         }
 
         .nav-label {
             margin: 25px 12px 10px;
-            font-size: 11px;
             color: #94a3b8;
+            font-size: 10px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.2px;
         }
 
         .sidebar a {
-            display: block;
-            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 44px;
+            padding: 11px 12px;
             margin-bottom: 5px;
-            border-radius: 6px;
+            border-radius: 8px;
             color: #e2e8f0;
             text-decoration: none;
+            font-size: 14px;
             transition: background 0.2s, color 0.2s;
         }
 
         .sidebar a:hover {
-            background: #334155;
-            color: #facc15;
+            background: var(--navy-light);
+            color: white;
         }
 
         .sidebar a.active {
-            background: #facc15;
-            color: #172554;
-            font-weight: bold;
+            background: var(--yellow);
+            color: var(--navy);
+            font-weight: 600;
         }
 
+        /* LINE ICONS */
+        .nav-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .nav-icon svg,
+        .menu-toggle svg {
+            display: block;
+            width: 21px;
+            height: 21px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* LOGOUT */
         .sidebar form {
-            margin-top: 10px;
+            margin-top: 12px;
         }
 
         .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             width: 100%;
-            padding: 12px;
+            min-height: 44px;
+            padding: 11px 12px;
             border: none;
-            border-radius: 6px;
-            background: #991b1b;
-            color: white;
+            border-radius: 8px;
+            background: transparent;
+            color: #e2e8f0;
             text-align: left;
             font-size: 14px;
             cursor: pointer;
         }
 
         .logout-btn:hover {
-            background: #b91c1c;
+            background: #7f1d1d;
+            color: white;
         }
 
         /* MAIN CONTENT */
         .main {
-            margin-left: 250px;
             min-height: 100vh;
+            margin-left: 250px;
+            min-width: 0;
         }
 
-        /* STICKY TOP NAVIGATION BAR */
+        /* TOP BAR */
         .topbar {
             position: sticky;
             top: 0;
-            z-index: 99;
-
+            z-index: 500;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 15px;
-
-            padding: 20px 30px;
+            gap: 16px;
+            min-height: 70px;
+            padding: 18px 30px;
             background: white;
-            border-bottom: 1px solid #e5e7eb;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
         }
 
         .topbar h3 {
             margin: 0;
+            color: var(--navy);
+            font-size: 20px;
+            font-weight: 600;
         }
 
         .user-info {
-            font-size: 14px;
-            color: #64748b;
+            max-width: 45%;
+            color: var(--muted);
+            font-size: 13px;
+            text-align: right;
             overflow-wrap: anywhere;
         }
 
         .content {
-            padding: 30px;
+            width: 100%;
+            max-width: 1600px;
+            min-width: 0;
+            margin: 0 auto;
+            padding: 28px;
         }
 
-        /* DJANGO MESSAGES */
+        /* SIMPLE DJANGO MESSAGES */
         .messages {
-            margin-bottom: 20px;
+            display: grid;
+            gap: 8px;
+            margin-bottom: 18px;
         }
 
         .message {
-            padding: 14px 16px;
-            margin-bottom: 10px;
+            padding: 10px 13px;
+            border: 1px solid var(--border);
             border-radius: 6px;
-            background: #dbeafe;
-            color: #1e40af;
+            background: white;
+            color: #334155;
+            font-size: 13px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
         }
 
         .message.success {
-            background: #dcfce7;
+            border-color: #bbf7d0;
+            background: #f0fdf4;
             color: #166534;
         }
 
         .message.error {
-            background: #fee2e2;
+            border-color: #fecaca;
+            background: #fef2f2;
             color: #991b1b;
         }
 
         .message.warning {
-            background: #fef3c7;
+            border-color: #fde68a;
+            background: #fffbeb;
             color: #92400e;
         }
 
         .message.info {
-            background: #dbeafe;
-            color: #1e40af;
+            border-color: #bfdbfe;
+            background: #eff6ff;
+            color: #1d4ed8;
         }
 
         /* SHARED BUTTONS */
         .btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 40px;
             padding: 10px 15px;
             border: none;
-            border-radius: 6px;
-            background: #172554;
+            border-radius: 7px;
+            background: var(--navy);
             color: white;
             text-decoration: none;
             cursor: pointer;
@@ -185,84 +263,179 @@
         }
 
         .btn-yellow {
-            background: #facc15;
-            color: #172554;
+            background: var(--yellow);
+            color: var(--navy);
         }
 
-        /* RESPONSIVE LAYOUT */
-        @media (max-width: 768px) {
+        img {
+            max-width: 100%;
+        }
+
+        /* HAMBURGER BUTTON: HIDDEN ON DESKTOP */
+        .menu-toggle {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 42px;
+            height: 42px;
+            padding: 9px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            color: var(--navy);
+            cursor: pointer;
+        }
+
+        .menu-toggle:hover {
+            background: var(--page-bg);
+        }
+
+        /* BACKGROUND OVERLAY */
+        .sidebar-overlay {
+            display: none;
+        }
+
+        /* TABLET */
+        @media (max-width: 900px) and (min-width: 601px) {
             .sidebar {
-                width: 200px;
+                width: 210px;
             }
 
             .main {
-                margin-left: 200px;
+                margin-left: 210px;
             }
 
             .content {
-                padding: 20px 15px;
+                padding: 22px 18px;
             }
 
             .topbar {
-                padding: 15px;
+                padding: 16px 20px;
             }
         }
 
-        @media (max-width: 520px) {
+        /* MOBILE HAMBURGER NAVIGATION */
+        @media (max-width: 600px) {
             .sidebar {
-                width: 65px;
-                padding: 20px 8px;
+                width: 260px;
+                max-width: 85vw;
+                padding: 22px 15px;
+                transform: translateX(-105%);
+                transition: transform 0.25s ease;
+                box-shadow: none;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: 5px 0 25px rgba(0, 0, 0, 0.15);
             }
 
             .brand {
-                padding: 0 0 15px;
-                text-align: center;
+                padding: 0 12px 24px;
+                text-align: left;
             }
 
             .brand h2 {
-                font-size: 11px;
-                overflow-wrap: anywhere;
+                font-size: 23px;
             }
 
             .brand p,
-            .nav-label,
-            .sidebar .nav-text {
-                display: none;
+            .nav-text {
+                display: inline;
+            }
+
+            .nav-label {
+                display: block;
+                margin: 25px 12px 10px;
             }
 
             .sidebar a {
-                padding: 12px 5px;
-                text-align: center;
-                font-size: 12px;
+                justify-content: flex-start;
+                gap: 12px;
+                padding: 11px 12px;
+                font-size: 14px;
+            }
+
+            .sidebar form {
+                margin-top: 12px;
             }
 
             .logout-btn {
-                padding: 12px 5px;
-                text-align: center;
-                font-size: 12px;
+                justify-content: flex-start;
+                gap: 12px;
+                padding: 11px 12px;
+                font-size: 14px;
             }
 
             .main {
-                margin-left: 65px;
+                margin-left: 0;
             }
 
             .topbar {
-                align-items: flex-start;
-                flex-direction: column;
-                gap: 8px;
-                padding: 15px 10px;
+                flex-direction: row;
+                align-items: center;
+                gap: 10px;
+                min-height: 65px;
+                padding: 12px;
+            }
+
+            .menu-toggle {
+                display: inline-flex;
             }
 
             .topbar h3 {
-                font-size: 17px;
+                flex: 1;
+                min-width: 0;
+                font-size: 16px;
+                line-height: 1.35;
+                overflow-wrap: anywhere;
             }
 
             .user-info {
-                font-size: 11px;
+                max-width: 35%;
+                font-size: 10px;
+                text-align: right;
             }
 
             .content {
-                padding: 15px 10px;
+                padding: 16px 12px;
+            }
+
+            .message {
+                padding: 10px 11px;
+                font-size: 12px;
+            }
+
+            .btn {
+                max-width: 100%;
+                font-size: 13px;
+            }
+
+            /* Scroll wide tables inside their own container */
+            .table-responsive {
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .table-responsive table {
+                min-width: 550px;
+            }
+
+            /* DARK OVERLAY WHEN MENU IS OPEN */
+            .sidebar-overlay.visible {
+                display: block;
+                position: fixed;
+                inset: 0;
+                z-index: 900;
+                background: rgba(15, 23, 42, 0.45);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .sidebar {
+                transition: none;
             }
         }
     </style>
@@ -271,9 +444,8 @@
 </head>
 
 <body>
-
     <!-- STAFF SIDEBAR -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="staffSidebar">
         <div class="brand">
             <h2>MahaServe</h2>
             <p>Barangay Mahayahay</p>
@@ -281,45 +453,102 @@
 
         <p class="nav-label">Main Menu</p>
 
-        <!-- Dashboard -->
+        <!-- DASHBOARD -->
         <a href="{% url 'admin_dashboard' %}"
+           aria-label="Dashboard"
+           title="Dashboard"
            class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
-            📊 <span class="nav-text">Dashboard</span>
+            <span class="nav-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="3" width="8" height="8" rx="1.5"/>
+                    <rect x="14" y="3" width="7" height="5" rx="1.5"/>
+                    <rect x="14" y="11" width="7" height="10" rx="1.5"/>
+                    <rect x="3" y="14" width="8" height="7" rx="1.5"/>
+                </svg>
+            </span>
+            <span class="nav-text">Dashboard</span>
         </a>
 
-        <!-- Manage Documents -->
+        <!-- MANAGE DOCUMENTS -->
         <a href="{% url 'manage_documents' %}"
+           aria-label="Manage Documents"
+           title="Manage Documents"
            class="{% if request.resolver_match.url_name == 'manage_documents' or request.resolver_match.url_name == 'add_document' or request.resolver_match.url_name == 'edit_document' %}active{% endif %}">
-            📄 <span class="nav-text">Manage Documents</span>
+            <span class="nav-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <path d="M14 2v6h6M8 13h8M8 17h8"/>
+                </svg>
+            </span>
+            <span class="nav-text">Manage Documents</span>
         </a>
 
-        <!-- Manage Requests -->
+        <!-- MANAGE REQUESTS -->
         <a href="{% url 'manage_requests' %}"
+           aria-label="Manage Requests"
+           title="Manage Requests"
            class="{% if request.resolver_match.url_name == 'manage_requests' or request.resolver_match.url_name == 'request_details' or request.resolver_match.url_name == 'update_request' %}active{% endif %}">
-            📋 <span class="nav-text">Manage Requests</span>
+            <span class="nav-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M9 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-4"/>
+                    <rect x="9" y="3" width="6" height="4" rx="1"/>
+                    <path d="m8 13 2 2 5-5M8 18h8"/>
+                </svg>
+            </span>
+            <span class="nav-text">Manage Requests</span>
         </a>
 
         <p class="nav-label">Account</p>
 
-        <!-- Public Website -->
-        <a href="{% url 'landing' %}">
-            🏠 <span class="nav-text">View Website</span>
+        <!-- PUBLIC WEBSITE -->
+        <a href="{% url 'landing' %}"
+           aria-label="View Website"
+           title="View Website">
+            <span class="nav-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m3 10 9-7 9 7"/>
+                    <path d="M5 9v12h14V9M9 21v-8h6v8"/>
+                </svg>
+            </span>
+            <span class="nav-text">View Website</span>
         </a>
 
-        <!-- Logout -->
+        <!-- LOGOUT -->
         <form method="POST" action="{% url 'logout' %}">
             {% csrf_token %}
             <button type="submit" class="logout-btn">
-                🚪 <span class="nav-text">Logout</span>
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M10 17l5-5-5-5M15 12H3"/>
+                        <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/>
+                    </svg>
+                </span>
+                <span class="nav-text">Logout</span>
             </button>
         </form>
     </aside>
 
+    <!-- MOBILE SIDEBAR OVERLAY -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <!-- MAIN AREA -->
     <div class="main">
 
-        <!-- STICKY TOP BAR -->
+        <!-- TOP BAR -->
         <header class="topbar">
+            <!-- MOBILE HAMBURGER -->
+            <button
+                type="button"
+                class="menu-toggle"
+                id="menuToggle"
+                aria-label="Open navigation menu"
+                aria-expanded="false"
+                aria-controls="staffSidebar">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+
             <h3>{% block page_heading %}Staff Dashboard{% endblock %}</h3>
 
             <div class="user-info">
@@ -327,11 +556,12 @@
             </div>
         </header>
 
+        <!-- PAGE CONTENT -->
         <main class="content">
 
-            <!-- SHARED DJANGO MESSAGES -->
+            <!-- SIMPLE DJANGO MESSAGES -->
             {% if messages %}
-                <div class="messages">
+                <div class="messages" aria-live="polite">
                     {% for message in messages %}
                         <div class="message {{ message.tags }}">
                             {{ message }}
@@ -340,14 +570,76 @@
                 </div>
             {% endif %}
 
-            <!-- PAGE CONTENT -->
-            {% block content %}
-            {% endblock %}
+            {% block content %}{% endblock %}
 
         </main>
     </div>
 
     {% block extra_js %}{% endblock %}
 
+    <!-- HAMBURGER MENU FUNCTIONALITY -->
+    <script>
+        (function () {
+            const menuToggle = document.getElementById("menuToggle");
+            const sidebar = document.getElementById("staffSidebar");
+            const overlay = document.getElementById("sidebarOverlay");
+
+            if (!menuToggle || !sidebar || !overlay) {
+                return;
+            }
+
+            function isMobile() {
+                return window.matchMedia("(max-width: 600px)").matches;
+            }
+
+            function openMenu() {
+                if (!isMobile()) return;
+
+                sidebar.classList.add("open");
+                overlay.classList.add("visible");
+                menuToggle.setAttribute("aria-expanded", "true");
+                menuToggle.setAttribute("aria-label", "Close navigation menu");
+                document.body.classList.add("menu-open");
+            }
+
+            function closeMenu() {
+                sidebar.classList.remove("open");
+                overlay.classList.remove("visible");
+                menuToggle.setAttribute("aria-expanded", "false");
+                menuToggle.setAttribute("aria-label", "Open navigation menu");
+                document.body.classList.remove("menu-open");
+            }
+
+            menuToggle.addEventListener("click", function () {
+                if (sidebar.classList.contains("open")) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            });
+
+            overlay.addEventListener("click", closeMenu);
+
+            sidebar.querySelectorAll("a").forEach(function (link) {
+                link.addEventListener("click", closeMenu);
+            });
+
+            sidebar.querySelectorAll("form").forEach(function (form) {
+                form.addEventListener("submit", closeMenu);
+            });
+
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape") {
+                    closeMenu();
+                }
+            });
+
+            window.addEventListener("resize", function () {
+                if (!isMobile()) {
+                    closeMenu();
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

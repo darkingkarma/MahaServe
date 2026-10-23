@@ -13,6 +13,7 @@ from .models import DocumentType, DocumentRequest, ResidentProfile, DocumentPaym
 import resend
 from django.conf import settings
 from django.urls import reverse
+from django.db.models import Q
 import requests
 from django.views.decorators.http import require_POST
 
@@ -20,7 +21,16 @@ from django.views.decorators.http import require_POST
 # LANDING PAGE
 # ==========================================
 def landing(request):
-    return render(request, "documents/landing.html")
+    document_types = DocumentType.objects.all().order_by("name")
+
+    return render(
+        request,
+        "documents/landing.html",
+        {
+            "document_types": document_types,
+        },
+    )
+
 
 
 # ==========================================
@@ -591,7 +601,34 @@ def manage_requests(request):
     requests_list = DocumentRequest.objects.select_related(
         "resident",
         "document_type",
-    ).order_by("-submitted_at")
+    ).all()
+
+    # Get search and filter values
+    search_query = request.GET.get("q", "").strip()
+    status_filter = request.GET.get("status", "").strip()
+
+    # Search by resident, document name, or purpose
+    if search_query:
+        requests_list = requests_list.filter(
+            Q(resident__username__icontains=search_query)
+            | Q(resident__first_name__icontains=search_query)
+            | Q(resident__last_name__icontains=search_query)
+            | Q(document_type__name__icontains=search_query)
+            | Q(purpose__icontains=search_query)
+        )
+
+    # Filter by request status
+    valid_statuses = {
+        value for value, label in DocumentRequest.STATUS_CHOICES
+    }
+
+    if status_filter in valid_statuses:
+        requests_list = requests_list.filter(
+            status=status_filter
+        )
+
+    # Show newest requests first
+    requests_list = requests_list.order_by("-submitted_at", "-id")
 
     context = {
         "requests_list": requests_list,
@@ -603,7 +640,6 @@ def manage_requests(request):
         "documents/manage_requests.html",
         context,
     )
-
 
 
 @staff_member_required(login_url="/login/")
@@ -736,9 +772,27 @@ def update_request(request, request_id):
 # DOCUMENT MANAGEMENT - STAFF CRUD
 # ==========================================
 
+
+@login_required(login_url="/login/")
 @staff_member_required(login_url="/login/")
 def manage_documents(request):
-    document_types = DocumentType.objects.all().order_by("name")
+    document_types = DocumentType.objects.all()
+
+    search_query = request.GET.get("q", "").strip()
+    status_filter = request.GET.get("status", "all")
+
+    if search_query:
+        document_types = document_types.filter(
+            Q(name__icontains=search_query)
+            | Q(description__icontains=search_query)
+        )
+
+    if status_filter == "active":
+        document_types = document_types.filter(is_available=True)
+    elif status_filter == "inactive":
+        document_types = document_types.filter(is_available=False)
+
+    document_types = document_types.order_by("-id")
 
     return render(
         request,

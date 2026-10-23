@@ -5,54 +5,107 @@
 {% block page_heading %}Document Request Details{% endblock %}
 
 {% block content %}
+
 <style>
     .details-page {
-        max-width: 1000px;
+        width: 100%;
+        max-width: 1050px;
         margin: 0 auto;
+        min-width: 0;
+        color: #172554;
+    }
+
+    * {
+        box-sizing: border-box;
     }
 
     .page-intro {
-        margin-bottom: 22px;
+        margin: 0 0 22px;
         color: #64748b;
-        line-height: 1.6;
+        font-size: 14px;
+        line-height: 1.7;
     }
 
     .back-link {
-        display: inline-block;
-        margin-bottom: 18px;
-        color: #17365d;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        color: #1d4ed8;
+        font-size: 13px;
+        font-weight: 700;
         text-decoration: none;
-        font-weight: bold;
     }
 
     .back-link:hover {
+        color: #1e40af;
         text-decoration: underline;
     }
 
     .details-card {
-        background: white;
         padding: 28px;
-        border-radius: 10px;
-        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+        background: #fff;
+        border: 1px solid #e8edf5;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(23, 37, 84, 0.05);
     }
 
-    .details-card h2 {
-        color: #17365d;
-        margin: 0 0 10px;
+    .details-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        padding-bottom: 22px;
+        border-bottom: 1px solid #edf1f7;
+    }
+
+    .details-header h2 {
+        margin: 0 0 7px;
+        color: #172554;
+        font-size: clamp(22px, 3vw, 28px);
+        letter-spacing: -0.5px;
+        overflow-wrap: anywhere;
+    }
+
+    .details-header p {
+        margin: 0;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .request-number {
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 11px;
+        border-radius: 8px;
+        background: #f1f5f9;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .section-title {
+        margin: 25px 0 14px;
+        color: #172554;
+        font-size: 15px;
+        font-weight: 750;
     }
 
     .details-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 18px;
-        margin-top: 24px;
+        gap: 14px;
     }
 
     .detail-item {
-        padding: 16px;
+        min-width: 0;
+        padding: 17px;
         background: #f8fafc;
-        border-radius: 7px;
-        overflow-wrap: anywhere;
+        border: 1px solid #edf1f7;
+        border-radius: 10px;
     }
 
     .detail-item.full {
@@ -61,73 +114,209 @@
 
     .detail-label {
         display: block;
-        color: #64748b;
-        font-size: 13px;
         margin-bottom: 8px;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 750;
+        text-transform: uppercase;
+        letter-spacing: 0.45px;
     }
 
     .detail-value {
-        font-weight: bold;
-        line-height: 1.7;
         color: #263445;
+        font-size: 14px;
+        font-weight: 650;
+        line-height: 1.75;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .detail-value a {
+        color: #1d4ed8;
+        overflow-wrap: anywhere;
     }
 
     .status {
-        display: inline-block;
-        padding: 6px 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 6px 11px;
         border-radius: 20px;
         background: #e8eef7;
         color: #17365d;
-        font-size: 13px;
-        font-weight: bold;
+        font-size: 12px;
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+    .status::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .status-pending {
+        background: #fff7df;
+        color: #a16207;
+    }
+
+    .status-under-review {
+        background: #eaf2ff;
+        color: #1d4ed8;
+    }
+
+    .status-approved {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-rejected {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .status-released {
+        background: #f3e8ff;
+        color: #7e22ce;
     }
 
     .remarks {
+        font-weight: 400;
         white-space: pre-wrap;
-        font-weight: normal;
+    }
+
+    .purpose-value {
+        font-weight: 400;
+        white-space: pre-wrap;
+    }
+
+    .fee-value {
+        color: #166534;
+        font-size: 18px;
+        font-weight: 800;
     }
 
     .actions {
         display: flex;
-        gap: 12px;
-        margin-top: 25px;
+        align-items: center;
         flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 26px;
+        padding-top: 22px;
+        border-top: 1px solid #edf1f7;
     }
 
     .action-button {
-        display: inline-block;
-        padding: 11px 16px;
-        border-radius: 5px;
+        display: inline-flex;
+        min-height: 43px;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 11px 17px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: #172554;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 750;
+        text-align: center;
         text-decoration: none;
-        background: #17365d;
-        color: white;
-        font-weight: bold;
+        transition: background 0.2s, transform 0.2s;
     }
 
     .action-button:hover {
-        background: #24518a;
+        background: #263d78;
     }
 
     .action-button.secondary {
-        background: #e5e7eb;
-        color: #263445;
+        border-color: #dbe2ed;
+        background: #fff;
+        color: #334155;
     }
 
     .action-button.secondary:hover {
-        background: #d1d5db;
+        background: #f8fafc;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 700px) {
         .details-card {
-            padding: 18px;
+            padding: 21px;
+            border-radius: 13px;
+        }
+
+        .details-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .details-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 11px;
+        }
+
+        .detail-item {
+            padding: 14px;
+        }
+
+        .detail-item.full {
+            grid-column: 1 / -1;
+        }
+
+        .section-title {
+            margin-top: 22px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-intro {
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+
+        .back-link {
+            margin-bottom: 15px;
+        }
+
+        .details-card {
+            padding: 16px;
+        }
+
+        .details-header h2 {
+            font-size: 22px;
         }
 
         .details-grid {
             grid-template-columns: 1fr;
+            gap: 10px;
         }
 
+        .detail-item,
         .detail-item.full {
             grid-column: auto;
+            padding: 14px;
+        }
+
+        .detail-value {
+            font-size: 13px;
+        }
+
+        .fee-value {
+            font-size: 17px;
+        }
+
+        .actions {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+
+        .action-button {
+            width: 100%;
+            min-height: 45px;
+            box-sizing: border-box;
         }
     }
 </style>
@@ -140,12 +329,28 @@
     </p>
 
     <a class="back-link" href="{% url 'manage_requests' %}">
-        &larr; Back to Manage Requests
+        <span aria-hidden="true">&larr;</span>
+        Back to Manage Requests
     </a>
 
     <section class="details-card">
-        <h2>Request #{{ document_request.id }}</h2>
-        <p>Complete information about this document request.</p>
+
+        <!-- Request header -->
+        <div class="details-header">
+            <div>
+                <h2>Document Request Details</h2>
+                <p>
+                    Complete information about this resident's application.
+                </p>
+            </div>
+
+            <span class="request-number">
+                Request #{{ document_request.id }}
+            </span>
+        </div>
+
+        <!-- Request information -->
+        <h3 class="section-title">Request Information</h3>
 
         <div class="details-grid">
 
@@ -159,34 +364,9 @@
             <div class="detail-item">
                 <span class="detail-label">Current Status</span>
                 <div class="detail-value">
-                    <span class="status">
+                    <span class="status status-{{ document_request.status|slugify }}">
                         {{ document_request.get_status_display }}
                     </span>
-                </div>
-            </div>
-
-            <div class="detail-item">
-                <span class="detail-label">Resident Username</span>
-                <div class="detail-value">
-                    {{ document_request.resident.username }}
-                </div>
-            </div>
-
-            <div class="detail-item">
-                <span class="detail-label">Resident Full Name</span>
-                <div class="detail-value">
-                    {% if document_request.resident.get_full_name %}
-                        {{ document_request.resident.get_full_name }}
-                    {% else %}
-                        Not provided
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="detail-item">
-                <span class="detail-label">Resident Email</span>
-                <div class="detail-value">
-                    {{ document_request.resident.email|default:"Not provided" }}
                 </div>
             </div>
 
@@ -199,7 +379,7 @@
 
             <div class="detail-item">
                 <span class="detail-label">Document Fee</span>
-                <div class="detail-value">
+                <div class="detail-value fee-value">
                     ₱{{ document_request.document_type.fee|floatformat:2 }}
                 </div>
             </div>
@@ -207,43 +387,99 @@
             <div class="detail-item">
                 <span class="detail-label">Date Submitted</span>
                 <div class="detail-value">
-                    {{ document_request.submitted_at|date:"M d, Y - h:i A" }}
+                    {{ document_request.submitted_at|date:"M d, Y" }}
+                    <br>
+                    <span style="color: #64748b; font-size: 12px; font-weight: 400;">
+                        {{ document_request.submitted_at|date:"h:i A" }}
+                    </span>
                 </div>
             </div>
 
             <div class="detail-item">
                 <span class="detail-label">Last Updated</span>
                 <div class="detail-value">
-                    {{ document_request.updated_at|date:"M d, Y - h:i A" }}
+                    {% if document_request.updated_at %}
+                        {{ document_request.updated_at|date:"M d, Y" }}
+                        <br>
+                        <span style="color: #64748b; font-size: 12px; font-weight: 400;">
+                            {{ document_request.updated_at|date:"h:i A" }}
+                        </span>
+                    {% else %}
+                        Not available
+                    {% endif %}
                 </div>
             </div>
 
             <div class="detail-item full">
                 <span class="detail-label">Purpose of Request</span>
+                <div class="detail-value purpose-value">
+                    {{ document_request.purpose|default:"No purpose provided." }}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Resident information -->
+        <h3 class="section-title">Resident Information</h3>
+
+        <div class="details-grid">
+
+            <div class="detail-item">
+                <span class="detail-label">Username</span>
                 <div class="detail-value">
-                    {{ document_request.purpose|linebreaksbr }}
+                    {{ document_request.resident.username }}
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Full Name</span>
+                <div class="detail-value">
+                    {% if document_request.resident.get_full_name %}
+                        {{ document_request.resident.get_full_name }}
+                    {% else %}
+                        Not provided
+                    {% endif %}
                 </div>
             </div>
 
             <div class="detail-item full">
-                <span class="detail-label">Staff Remarks</span>
-                <div class="detail-value remarks">{% if document_request.remarks %}{{ document_request.remarks }}{% else %}No remarks have been added yet.{% endif %}</div>
+                <span class="detail-label">Email Address</span>
+                <div class="detail-value">
+                    {% if document_request.resident.email %}
+                        <a href="mailto:{{ document_request.resident.email }}">
+                            {{ document_request.resident.email }}
+                        </a>
+                    {% else %}
+                        Not provided
+                    {% endif %}
+                </div>
             </div>
 
         </div>
 
+        <!-- Staff remarks -->
+        <h3 class="section-title">Staff Remarks</h3>
+
+        <div class="details-grid">
+            <div class="detail-item full">
+                <span class="detail-label">Remarks for Resident</span>
+                <div class="detail-value remarks">{% if document_request.remarks %}{{ document_request.remarks }}{% else %}No remarks have been added yet.{% endif %}</div>
+            </div>
+        </div>
+
+        <!-- Navigation actions -->
         <div class="actions">
-            <a class="action-button"
-               href="{% url 'manage_requests' %}">
-                Manage Requests
+            <a class="action-button" href="{% url 'manage_requests' %}">
+                &larr; Manage Requests
             </a>
 
-            <a class="action-button secondary"
-               href="{% url 'admin_dashboard' %}">
+            <a class="action-button secondary" href="{% url 'admin_dashboard' %}">
                 Staff Dashboard
             </a>
         </div>
+
     </section>
 
 </div>
+
 {% endblock %}

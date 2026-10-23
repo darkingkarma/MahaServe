@@ -13,77 +13,89 @@
 
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f7fb;
+            padding: 20px;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #333;
         }
 
         .container {
             width: 100%;
-            max-width: 420px;
-            padding: 20px;
+            max-width: 400px;
         }
 
         .card {
             background: white;
-            padding: 35px;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
         }
 
         h1 {
+            margin: 0 0 8px;
             text-align: center;
             color: #17365d;
-            margin-bottom: 5px;
+            font-size: 28px;
         }
 
         .subtitle {
+            margin: 0 0 28px;
             text-align: center;
             color: #777;
-            margin-bottom: 30px;
+            font-size: 14px;
+            line-height: 1.5;
         }
 
         label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 7px;
+            font-size: 14px;
             font-weight: bold;
-            color: #333;
         }
 
         input {
+            display: block;
             width: 100%;
             padding: 12px;
             margin-bottom: 18px;
-            border: 1px solid #ccc;
+            border: 1px solid #d1d5db;
             border-radius: 6px;
             font-size: 15px;
         }
 
-        button {
+        input:focus {
+            outline: none;
+            border-color: #17365d;
+            box-shadow: 0 0 0 2px rgba(23, 54, 93, 0.1);
+        }
+
+        button,
+        .google-button {
             width: 100%;
-            padding: 13px;
-            border: none;
+            min-height: 44px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
             border-radius: 6px;
-            background: #17365d;
-            color: white;
-            font-size: 16px;
+            font-size: 15px;
             cursor: pointer;
         }
 
-        button:hover {
-            background: #0f2947;
+        button {
+            border: none;
+            background: #17365d;
+            color: white;
+            font-weight: bold;
         }
 
-        .error {
-            background: #ffe5e5;
-            color: #b00020;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 18px;
-            text-align: center;
+        button:hover {
+            background: #102946;
         }
 
         .divider {
@@ -100,24 +112,14 @@
             content: "";
             flex: 1;
             height: 1px;
-            background: #e0e0e0;
+            background: #e5e7eb;
         }
 
         .google-button {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #dadce0;
-            border-radius: 6px;
+            border: 1px solid #d1d5db;
             background: white;
             color: #333;
-            font-size: 15px;
-            font-weight: bold;
             text-decoration: none;
-            transition: background 0.2s;
         }
 
         .google-button:hover {
@@ -125,100 +127,132 @@
         }
 
         .google-icon {
-            width: 20px;
-            height: 20px;
+            width: 19px;
+            height: 19px;
+        }
+
+        .error {
+            padding: 11px;
+            margin-bottom: 18px;
+            border-radius: 6px;
+            background: #fee2e2;
+            color: #b91c1c;
+            font-size: 14px;
+            text-align: center;
         }
 
         .links {
+            margin-top: 24px;
             text-align: center;
-            margin-top: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .links p {
+            margin: 10px 0;
         }
 
         .links a {
             color: #17365d;
-            text-decoration: none;
             font-weight: bold;
+            text-decoration: none;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 14px;
+                align-items: center;
+            }
+
+            .card {
+                padding: 24px 20px;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
         }
     </style>
 </head>
 
 <body>
+    <main class="container">
+        <section class="card">
+            <h1>MahaServe</h1>
 
-<div class="container">
-    <div class="card">
+            <p class="subtitle">
+                Barangay Mahayahay Document Services
+            </p>
 
-        <h1>MahaServe</h1>
+            {% if form.errors %}
+                <div class="error">
+                    Invalid username or password.
+                    Please try again.
+                </div>
+            {% endif %}
 
-        <p class="subtitle">
-            Barangay Mahayahay Document Services
-        </p>
+            <form method="post">
+                {% csrf_token %}
 
-        {% if form.errors %}
-            <div class="error">
-                Invalid username or password.
+                <label for="id_username">Username</label>
+                <input
+                    type="text"
+                    name="username"
+                    id="id_username"
+                    placeholder="Enter your username"
+                    autocomplete="username"
+                    required
+                >
+
+                <label for="id_password">Password</label>
+                <input
+                    type="password"
+                    name="password"
+                    id="id_password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                >
+
+                <button type="submit">Login</button>
+            </form>
+
+            <div class="divider">OR</div>
+
+            <a href="/accounts/google/login/" class="google-button">
+                <svg class="google-icon"
+                     xmlns="http://www.w3.org/2000/svg"
+                     viewBox="0 0 48 48"
+                     aria-hidden="true">
+                    <path fill="#EA4335"
+                          d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4"
+                          d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6C44.42 37.96 46.98 31.77 46.98 24.55z"/>
+                    <path fill="#FBBC05"
+                          d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.52 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853"
+                          d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.14 1.44-4.89 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+                Continue with Google
+            </a>
+
+            <div class="links">
+                <p>
+                    Don't have an account?
+                    <a href="{% url 'register' %}">Register</a>
+                </p>
+
+                <p>
+                    <a href="{% url 'landing' %}">
+                        Back to Landing Page
+                    </a>
+                </p>
             </div>
-        {% endif %}
-
-        <form method="post">
-            {% csrf_token %}
-
-            <label for="id_username">Username</label>
-            <input
-                type="text"
-                name="username"
-                id="id_username"
-                placeholder="Enter your username"
-                autocomplete="username"
-                required
-            >
-
-            <label for="id_password">Password</label>
-            <input
-                type="password"
-                name="password"
-                id="id_password"
-                placeholder="Enter your password"
-                autocomplete="current-password"
-                required
-            >
-
-            <button type="submit">
-                Login
-            </button>
-        </form>
-
-        <div class="divider">OR</div>
-
-        <a href="/accounts/google/login/" class="google-button">
-            <svg class="google-icon"
-                 xmlns="http://www.w3.org/2000/svg"
-                 viewBox="0 0 48 48"
-                 aria-hidden="true">
-                <path fill="#EA4335"
-                      d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                <path fill="#4285F4"
-                      d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6C44.42 37.96 46.98 31.77 46.98 24.55z"/>
-                <path fill="#FBBC05"
-                      d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.52 2.56 10.78l7.97-6.19z"/>
-                <path fill="#34A853"
-                      d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.14 1.44-4.89 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-            </svg>
-            Continue with Google
-        </a>
-
-        <div class="links">
-            <p>
-                Don't have an account?
-                <a href="{% url 'register' %}">Register</a>
-            </p>
-
-            <p>
-                <a href="{% url 'landing' %}">Back to Landing Page</a>
-            </p>
-        </div>
-
-    </div>
-</div>
-
+        </section>
+    </main>
 </body>
 </html>
