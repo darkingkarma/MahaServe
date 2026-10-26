@@ -16,6 +16,12 @@ urlpatterns = [
         views.resident_dashboard,
         name="resident_dashboard",
     ),
+
+    path(
+        "resident/search-documents/",
+        views.search_documents,
+        name="search_documents",
+    ),
     path(
         "resident/profile/",
         views.resident_profile,
@@ -100,5 +106,16 @@ urlpatterns = [
         "staff/requests/<int:request_id>/update/",
         views.update_request,
         name="update_request",
+    ),
+
+    path(
+        "notifications/",
+        views.notification_list,
+        name="notification_list",
+    ),
+    path(
+        "notifications/<int:notification_id>/read/",
+        views.mark_notification_read,
+        name="mark_notification_read",
     ),
 ]

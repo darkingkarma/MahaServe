@@ -9,11 +9,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db import IntegrityError
 from decimal import Decimal
-from .models import DocumentType, DocumentRequest, ResidentProfile, DocumentPayment
+from .models import DocumentType, DocumentRequest, ResidentProfile, DocumentPayment, Notification
 import resend
 from django.conf import settings
 from django.urls import reverse
 from django.db.models import Q
+from django.db import connection
 import requests
 from django.views.decorators.http import require_POST
 
@@ -38,19 +39,29 @@ def landing(request):
 # ==========================================
 
 
+
 def register(request):
+    from datetime import date
+    from django.db import IntegrityError, transaction, DatabaseError
+    from django.contrib.auth.models import User
+    from django.db import connection
+    from .models import ResidentProfile
+
     if request.user.is_authenticated:
         if request.user.is_staff:
             return redirect("admin_dashboard")
         return redirect("resident_dashboard")
 
     if request.method == "POST":
+        # Account information
+        first_name = request.POST.get("first_name", "").strip()
+        last_name = request.POST.get("last_name", "").strip()
         username = request.POST.get("username", "").strip()
         email = request.POST.get("email", "").strip()
         password = request.POST.get("password", "")
         confirm_password = request.POST.get("confirm_password", "")
 
-        # Resident profile fields
+        # Resident information
         contact_number = request.POST.get("contact_number", "").strip()
         house_number = request.POST.get("house_number", "").strip()
         street = request.POST.get("street", "").strip()
@@ -58,14 +69,34 @@ def register(request):
         date_of_birth = request.POST.get("date_of_birth", "").strip()
         sex = request.POST.get("sex", "").strip()
 
-        if not username or not email or not password or not confirm_password:
-            messages.error(request, "Please fill in all required fields.")
+        # Validate required fields
+        if not all([
+            first_name,
+            last_name,
+            username,
+            email,
+            password,
+            confirm_password,
+            contact_number,
+            house_number,
+            street,
+            purok,
+            date_of_birth,
+            sex,
+        ]):
+            messages.error(
+                request,
+                "Please fill in all required fields."
+            )
 
         elif password != confirm_password:
             messages.error(request, "Passwords do not match.")
 
         elif len(password) < 8:
-            messages.error(request, "Password must be at least 8 characters.")
+            messages.error(
+                request,
+                "Password must be at least 8 characters."
+            )
 
         elif User.objects.filter(username__iexact=username).exists():
             messages.error(request, "Username is already taken.")
@@ -73,48 +104,51 @@ def register(request):
         elif User.objects.filter(email__iexact=email).exists():
             messages.error(request, "Email is already registered.")
 
-        elif sex and sex not in ["male", "female", "prefer_not_to_say"]:
+        elif sex not in ["male", "female", "prefer_not_to_say"]:
             messages.error(request, "Please select a valid sex option.")
 
         else:
             try:
-                from datetime import date
-                from django.db import transaction
-                from .models import ResidentProfile
+                parsed_date = date.fromisoformat(date_of_birth)
 
-                parsed_date = None
-                if date_of_birth:
-                    try:
-                        parsed_date = date.fromisoformat(date_of_birth)
-                        if parsed_date > date.today():
-                            messages.error(
-                                request,
-                                "Date of birth cannot be in the future."
-                            )
-                            return render(request, "documents/register.html")
-                    except ValueError:
-                        messages.error(
-                            request,
-                            "Please enter a valid date of birth."
-                        )
-                        return render(request, "documents/register.html")
+                if parsed_date > date.today():
+                    messages.error(
+                        request,
+                        "Date of birth cannot be in the future."
+                    )
+                    return render(
+                        request,
+                        "documents/register.html"
+                    )
 
                 with transaction.atomic():
+                    # Create the user and save first and last names
                     user = User.objects.create_user(
                         username=username,
                         email=email,
                         password=password,
+                        first_name=first_name,
+                        last_name=last_name,
                     )
 
-                    ResidentProfile.objects.create(
+                    print("NEW USER CREATED:", user.id)
+                    print("FIRST NAME:", user.first_name)
+                    print("LAST NAME:", user.last_name)
+
+                    # Create or update the resident profile
+                    ResidentProfile.objects.update_or_create(
                         user=user,
-                        contact_number=contact_number,
-                        house_number=house_number,
-                        street=street,
-                        purok=purok,
-                        date_of_birth=parsed_date,
-                        sex=sex,
+                        defaults={
+                            "contact_number": contact_number,
+                            "house_number": house_number,
+                            "street": street,
+                            "purok": purok,
+                            "date_of_birth": parsed_date,
+                            "sex": sex,
+                        },
                     )
+
+                    print("PROFILE CREATED OR UPDATED SUCCESSFULLY")
 
                 messages.success(
                     request,
@@ -122,13 +156,35 @@ def register(request):
                 )
                 return redirect("login")
 
-            except IntegrityError:
+            except ValueError:
                 messages.error(
                     request,
-                    "Unable to create the account. Please try again."
+                    "Please enter a valid date of birth."
+                )
+
+            except IntegrityError as e:
+                print("\n========== REGISTRATION ERROR ==========")
+                print("ERROR:", repr(e))
+                print("USERNAME:", username)
+                print("DATABASE:", connection.settings_dict["NAME"])
+                print("========================================\n")
+
+                messages.error(
+                    request,
+                    "Registration failed. Check the Django terminal for details."
+                )
+
+            except DatabaseError as e:
+                print("REGISTRATION DATABASE ERROR:", repr(e))
+
+                messages.error(
+                    request,
+                    "A database error occurred. Check the Django terminal "
+                    "for the exact error."
                 )
 
     return render(request, "documents/register.html")
+
 
 
 
@@ -164,7 +220,10 @@ def login(request):
             # Ordinary citizens go to their resident dashboard.
             return redirect("resident_dashboard")
 
-        messages.error(request, "Invalid username or password.")
+        messages.error(
+            request,
+            "Invalid username or password."
+        )
 
     return render(request, "documents/login.html")
 
@@ -214,6 +273,28 @@ def resident_dashboard(request):
         request,
         "documents/resident_dashboard.html",
         context
+    )
+
+
+@login_required(login_url="/login/")
+def search_documents(request):
+    query = request.GET.get("q", "").strip()
+
+    document_types = DocumentType.objects.all().order_by("name")
+
+    if query:
+        document_types = document_types.filter(
+            Q(name__icontains=query)
+            | Q(description__icontains=query)
+        )
+
+    return render(
+        request,
+        "documents/search_documents.html",
+        {
+            "document_types": document_types,
+            "query": query,
+        },
     )
 
 
@@ -539,6 +620,7 @@ def payment_cancel(request):
 # STAFF / ADMIN DASHBOARD
 # ==========================================
 
+
 @staff_member_required(login_url="/login/")
 def admin_dashboard(request):
     context = {
@@ -548,15 +630,22 @@ def admin_dashboard(request):
             status="pending"
         ).count(),
 
+        "under_review_requests": DocumentRequest.objects.filter(
+            status="under_review"
+        ).count(),
+
         "approved_requests": DocumentRequest.objects.filter(
             status="approved"
+        ).count(),
+
+        "rejected_requests": DocumentRequest.objects.filter(
+            status="rejected"
         ).count(),
 
         "released_requests": DocumentRequest.objects.filter(
             status="released"
         ).count(),
 
-        # Count registered citizen accounts, not document requests.
         "total_residents": User.objects.filter(
             is_staff=False,
             is_superuser=False,
@@ -567,7 +656,12 @@ def admin_dashboard(request):
         "recent_requests": DocumentRequest.objects.select_related(
             "resident",
             "document_type",
-        ).order_by("-submitted_at")[:5],
+        ).prefetch_related(
+            "payments"
+        ).order_by(
+            "-submitted_at",
+            "-id",
+        )[:5],
     }
 
     return render(
@@ -576,38 +670,59 @@ def admin_dashboard(request):
         context,
     )
 
+
 @staff_member_required(login_url="/login/")
 def request_details(request, request_id):
     document_request = get_object_or_404(
         DocumentRequest.objects.select_related(
             "resident",
-            "document_type"
-        ),
-        id=request_id
+            "document_type",
+        ).prefetch_related("payments"),
+        id=request_id,
     )
+
+    # Get the latest payment attempt for this request.
+    latest_payment = document_request.payments.order_by(
+        "-created_at",
+        "-id",
+    ).first()
 
     context = {
         "document_request": document_request,
+        "latest_payment": latest_payment,
     }
 
     return render(
         request,
         "documents/request_details.html",
-        context
+        context,
     )
+
+
+
+from django.db.models import Q, Prefetch
+from .models import DocumentRequest, DocumentPayment
+
 
 @staff_member_required(login_url="/login/")
 def manage_requests(request):
-    requests_list = DocumentRequest.objects.select_related(
-        "resident",
-        "document_type",
-    ).all()
+    requests_list = (
+        DocumentRequest.objects
+        .select_related("resident", "document_type")
+        .prefetch_related(
+            Prefetch(
+                "payments",
+                queryset=DocumentPayment.objects.order_by(
+                    "-created_at", "-id"
+                ),
+                to_attr="payment_records",
+            )
+        )
+    )
 
-    # Get search and filter values
     search_query = request.GET.get("q", "").strip()
     status_filter = request.GET.get("status", "").strip()
 
-    # Search by resident, document name, or purpose
     if search_query:
         requests_list = requests_list.filter(
             Q(resident__username__icontains=search_query)
@@ -617,17 +732,13 @@ def manage_requests(request):
             | Q(purpose__icontains=search_query)
         )
 
-    # Filter by request status
     valid_statuses = {
         value for value, label in DocumentRequest.STATUS_CHOICES
     }
 
     if status_filter in valid_statuses:
-        requests_list = requests_list.filter(
-            status=status_filter
-        )
+        requests_list = requests_list.filter(status=status_filter)
 
-    # Show newest requests first
     requests_list = requests_list.order_by("-submitted_at", "-id")
 
     context = {
@@ -981,8 +1092,11 @@ def toggle_document_availability(request, document_id):
     return redirect("manage_documents")
 
 
+
 @login_required(login_url="/login/")
 def resident_profile(request):
+    from datetime import date
+
     if request.user.is_staff:
         return redirect("admin_dashboard")
 
@@ -991,6 +1105,11 @@ def resident_profile(request):
     )
 
     if request.method == "POST":
+        # Personal information
+        first_name = request.POST.get("first_name", "").strip()
+        last_name = request.POST.get("last_name", "").strip()
+
+        # Resident information
         contact_number = request.POST.get("contact_number", "").strip()
         house_number = request.POST.get("house_number", "").strip()
         street = request.POST.get("street", "").strip()
@@ -998,15 +1117,30 @@ def resident_profile(request):
         date_of_birth = request.POST.get("date_of_birth", "").strip()
         sex = request.POST.get("sex", "").strip()
 
-        if sex and sex not in ["male", "female", "prefer_not_to_say"]:
-            messages.error(request, "Please select a valid sex option.")
-        else:
-            from datetime import date
+        # Validate names
+        if not first_name or not last_name:
+            messages.error(
+                request,
+                "Please enter your first name and last name."
+            )
 
+        elif sex and sex not in [
+            "male",
+            "female",
+            "prefer_not_to_say",
+        ]:
+            messages.error(
+                request,
+                "Please select a valid sex option."
+            )
+
+        else:
             parsed_date = None
+
             if date_of_birth:
                 try:
                     parsed_date = date.fromisoformat(date_of_birth)
+
                     if parsed_date > date.today():
                         messages.error(
                             request,
@@ -1017,6 +1151,7 @@ def resident_profile(request):
                             "documents/resident_profile.html",
                             {"profile": profile},
                         )
+
                 except ValueError:
                     messages.error(
                         request,
@@ -1028,15 +1163,29 @@ def resident_profile(request):
                         {"profile": profile},
                     )
 
+            # Save first name and last name to Django's User table
+            request.user.first_name = first_name
+            request.user.last_name = last_name
+
+            request.user.save(
+                update_fields=["first_name", "last_name"]
+            )
+
+            # Save resident details to ResidentProfile
             profile.contact_number = contact_number
             profile.house_number = house_number
             profile.street = street
             profile.purok = purok
             profile.date_of_birth = parsed_date
             profile.sex = sex
+
             profile.save()
 
-            messages.success(request, "Your profile has been updated!")
+            messages.success(
+                request,
+                "Your profile has been updated!"
+            )
+
             return redirect("resident_profile")
 
     return render(
@@ -1045,23 +1194,38 @@ def resident_profile(request):
         {"profile": profile},
     )
 
+
 @login_required(login_url="/login/")
 def my_requests(request):
-    if request.user.is_staff:
-        return redirect("admin_dashboard")
+    query = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "").strip()
 
     requests = DocumentRequest.objects.filter(
         resident=request.user
     ).select_related(
         "document_type"
+    ).prefetch_related(
+        "payments"
     ).order_by("-submitted_at")
+
+    if query:
+        requests = requests.filter(
+            Q(document_type__name__icontains=query)
+            | Q(purpose__icontains=query)
+            | Q(remarks__icontains=query)
+        )
+
+    if status:
+        requests = requests.filter(status=status)
 
     return render(
         request,
         "documents/my_requests.html",
         {
             "requests": requests,
-        }
+            "query": query,
+            "status": status,
+        },
     )
 
 
@@ -1133,3 +1297,39 @@ def ai_assistant(request):
             "question": question,
         },
     )
+
+
+
+@login_required(login_url="/login/")
+def notification_list(request):
+    notifications = Notification.objects.filter(
+        recipient=request.user
+    ).order_by("-created_at")
+
+    notifications.filter(is_read=False).update(is_read=True)
+
+    if request.user.is_staff:
+        template_name = "documents/staff_notifications.html"
+    else:
+        template_name = "documents/notifications.html"
+
+    return render(
+        request,
+        template_name,
+        {"notifications": notifications},
+    )
+
+
+
+@login_required(login_url="/login/")
+def mark_notification_read(request, notification_id):
+    notification = get_object_or_404(
+        Notification,
+        id=notification_id,
+        recipient=request.user,
+    )
+
+    notification.is_read = True
+    notification.save(update_fields=["is_read"])
+
+    return redirect("notification_list")

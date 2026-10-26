@@ -4,42 +4,93 @@
 
 {% block extra_css %}
 <style>
-    .page-header {
-        margin-bottom: 25px;
+    .page-header { margin-bottom: 25px; }
+    .page-header h1 { margin: 0 0 8px; color: #17365d; }
+    .page-header p { color: #5b6573; margin: 0; line-height: 1.6; }
+
+    .request-filters {
+        background: white;
+        padding: 18px;
+        border-radius: 10px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.05);
+        margin-bottom: 20px;
     }
 
-    .page-header h1 {
-        margin-bottom: 8px;
-        color: #17365d;
+    .filter-form {
+        display: grid;
+        grid-template-columns: minmax(0,1fr) 190px auto;
+        gap: 10px;
+        align-items: end;
     }
 
-    .page-header p {
-        color: #5b6573;
-        margin: 0;
-        line-height: 1.6;
+    .filter-group { display: flex; flex-direction: column; gap: 6px; }
+    .filter-label { color: #17365d; font-size: 13px; font-weight: bold; }
+
+    .filter-input, .filter-select {
+        width: 100%;
+        height: 42px;
+        padding: 0 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 7px;
+        background: white;
+        color: #374151;
+        font-size: 14px;
+        outline: none;
     }
+
+    .filter-input:focus, .filter-select:focus {
+        border-color: #17365d;
+        box-shadow: 0 0 0 2px rgba(23,54,93,.08);
+    }
+
+    .filter-button, .request-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #17365d;
+        color: white;
+        border: none;
+        border-radius: 7px;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background .2s;
+    }
+
+    .filter-button { height: 42px; padding: 0 18px; }
+    .filter-button:hover, .request-button:hover, .payment-button:hover { background: #24518a; }
+
+    .clear-filter {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 42px;
+        padding: 0 15px;
+        border-radius: 7px;
+        background: #f3f4f6;
+        color: #4b5563;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .clear-filter:hover { background: #e5e7eb; }
+    .filter-actions { display: flex; gap: 8px; }
+    .results-info { margin-top: 12px; color: #6b7280; font-size: 13px; }
 
     .requests-section {
         background: white;
         padding: 24px;
         border-radius: 10px;
-        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
-        overflow-x: auto;
+        box-shadow: 0 3px 12px rgba(0,0,0,.05);
     }
 
-    .requests-section h2 {
-        margin-top: 0;
-        color: #17365d;
-    }
+    .requests-section h2 { margin-top: 0; color: #17365d; }
+    .table-wrapper { width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 850px;
-    }
-
-    th,
-    td {
+    th, td {
         padding: 14px 12px;
         text-align: left;
         vertical-align: top;
@@ -53,100 +104,68 @@
         white-space: nowrap;
     }
 
-    td {
-        font-size: 14px;
-        color: #4b5563;
-        line-height: 1.5;
-    }
+    td { font-size: 14px; color: #4b5563; line-height: 1.5; }
 
-    .status {
+    .status, .paid-label, .free-label {
         display: inline-block;
         padding: 6px 10px;
         border-radius: 20px;
-        background: #e8eef7;
-        color: #17365d;
         font-size: 12px;
         font-weight: bold;
         white-space: nowrap;
     }
 
-    .status-pending {
-        background: #fff3cd;
-        color: #856404;
-    }
+    .status { background: #e8eef7; color: #17365d; }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-under_review { background: #dbeafe; color: #1d4ed8; }
+    .status-approved { background: #d1fae5; color: #065f46; }
+    .status-rejected { background: #fee2e2; color: #991b1b; }
+    .status-released { background: #dcfce7; color: #166534; }
 
-    .status-under_review {
-        background: #dbeafe;
-        color: #1d4ed8;
-    }
+    .remarks { max-width: 250px; overflow-wrap: anywhere; }
 
-    .status-approved {
-        background: #d1fae5;
-        color: #065f46;
-    }
-
-    .status-rejected {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .status-released {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .remarks {
-        max-width: 250px;
-        overflow-wrap: anywhere;
-    }
-
-    .collection-notice {
+    .collection-notice, .mobile-collection-notice {
         margin-top: 10px;
         padding: 12px;
         background: #f0fdf4;
         border: 1px solid #bbf7d0;
-        border-radius: 6px;
+        border-radius: 7px;
         color: #166534;
-        min-width: 180px;
     }
 
-    .collection-notice strong {
+    .collection-notice strong, .mobile-collection-notice strong,
+    .payment-box strong, .mobile-payment-box strong {
         display: block;
         margin-bottom: 5px;
     }
 
-    .collection-notice p {
+    .collection-notice p, .mobile-collection-notice p {
         margin: 0;
         font-size: 13px;
         line-height: 1.6;
     }
 
-    .status-notice {
+    .status-notice, .mobile-status-notice {
         margin-top: 8px;
         font-size: 12px;
         line-height: 1.5;
         color: #5b6573;
     }
 
-    .payment-box {
+    .payment-box, .mobile-payment-box {
         margin-top: 10px;
         padding: 12px;
         background: #eff6ff;
         border: 1px solid #bfdbfe;
-        border-radius: 6px;
-        min-width: 180px;
+        border-radius: 7px;
     }
 
-    .payment-box strong {
-        display: block;
-        margin-bottom: 5px;
-        color: #17365d;
-    }
-
-    .payment-box p {
-        margin: 0 0 10px 0;
+    .payment-box strong, .mobile-payment-box strong { color: #17365d; }
+    .payment-box p, .mobile-payment-box p {
+        margin: 0 0 10px;
         font-size: 13px;
         color: #4b5563;
+        line-height: 1.5;
     }
 
     .payment-button {
@@ -158,64 +177,74 @@
         text-decoration: none;
         font-size: 13px;
         font-weight: bold;
-        transition: background 0.2s;
+        transition: background .2s;
     }
 
-    .payment-button:hover {
-        background: #24518a;
+    .paid-label { background: #dcfce7; color: #166534; border-radius: 6px; }
+    .free-label { background: #f3f4f6; color: #4b5563; border-radius: 6px; }
+    .empty { color: #6b7280; padding: 20px 0; margin: 0; }
+
+    .request-button { padding: 10px 15px; margin-top: 15px; }
+    .mobile-requests { display: none; }
+
+    .request-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 17px;
+        margin-bottom: 15px;
+        background: white;
     }
 
-    .paid-label {
-        display: inline-block;
-        padding: 7px 10px;
-        background: #dcfce7;
-        color: #166534;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: bold;
-    }
+    .request-card:last-child { margin-bottom: 0; }
+    .request-card-title { margin: 0 0 15px; color: #17365d; font-size: 17px; }
+    .request-field { margin-bottom: 15px; }
+    .request-field:last-child { margin-bottom: 0; }
 
-    .free-label {
-        display: inline-block;
-        padding: 7px 10px;
-        background: #f3f4f6;
-        color: #4b5563;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: bold;
-    }
-
-    .empty {
+    .field-label {
+        display: block;
+        margin-bottom: 5px;
         color: #6b7280;
-        padding: 20px 0;
-        margin: 0;
-    }
-
-    .request-button {
-        display: inline-block;
-        background: #17365d;
-        color: white;
-        padding: 10px 15px;
-        border-radius: 6px;
-        text-decoration: none;
-        font-size: 14px;
+        font-size: 12px;
         font-weight: bold;
-        margin-top: 15px;
-        transition: background 0.2s;
+        text-transform: uppercase;
+        letter-spacing: .3px;
     }
 
-    .request-button:hover {
-        background: #24518a;
+    .field-value {
+        color: #374151;
+        font-size: 14px;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
     }
 
-    @media (max-width: 600px) {
-        .requests-section {
-            padding: 18px;
-        }
+    @media (max-width: 900px) {
+        .requests-section { padding: 20px; }
+        .filter-form { grid-template-columns: 1fr 170px; }
+        .filter-actions { grid-column: 1 / -1; }
+        .filter-button, .clear-filter { flex: 1; }
+        th, td { padding: 11px 9px; }
+    }
 
-        .page-header h1 {
-            font-size: 25px;
-        }
+    @media (max-width: 700px) {
+        .page-header h1 { font-size: 25px; }
+        .page-header p { font-size: 14px; }
+        .request-filters { padding: 15px; }
+        .filter-form { display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
+        .filter-actions { display: flex; width: 100%; }
+        .filter-button, .clear-filter { flex: 1; }
+        .requests-section { padding: 16px; border-radius: 9px; }
+        .table-wrapper { display: none; }
+        .mobile-requests { display: block; }
+    }
+
+    @media (max-width: 400px) {
+        .page-header h1 { font-size: 22px; }
+        .requests-section, .request-filters { padding: 13px; }
+        .request-card { padding: 14px; }
+        .request-card-title { font-size: 16px; }
+        .field-value { font-size: 13px; }
+        .filter-input, .filter-select { font-size: 13px; }
+        .payment-button { text-align: center; }
     }
 </style>
 {% endblock %}
@@ -224,15 +253,50 @@
 
 <div class="page-header">
     <h1>My Document Requests</h1>
-    <p>
-        View and track the status of your barangay document requests.
-    </p>
+    <p>View and track the status of your barangay document requests.</p>
+</div>
+
+<div class="request-filters">
+    <form method="get" action="{% url 'my_requests' %}" class="filter-form">
+        <div class="filter-group">
+            <label for="requestSearch" class="filter-label">Search Requests</label>
+            <input type="search" id="requestSearch" name="q"
+                   class="filter-input"
+                   placeholder="Search document, purpose, or remarks..."
+                   value="{{ request.GET.q|default:'' }}">
+        </div>
+
+        <div class="filter-group">
+            <label for="statusFilter" class="filter-label">Status</label>
+            <select id="statusFilter" name="status" class="filter-select">
+                <option value="">All Statuses</option>
+                <option value="pending" {% if status == "pending" %}selected{% endif %}>Pending</option>
+                <option value="under_review" {% if status == "under_review" %}selected{% endif %}>Under Review</option>
+                <option value="approved" {% if status == "approved" %}selected{% endif %}>Approved</option>
+                <option value="rejected" {% if status == "rejected" %}selected{% endif %}>Rejected</option>
+                <option value="released" {% if status == "released" %}selected{% endif %}>Released</option>
+            </select>
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit" class="filter-button">Search</button>
+            <a href="{% url 'my_requests' %}" class="clear-filter">Clear</a>
+        </div>
+    </form>
+
+    {% if query or status %}
+        <div class="results-info">
+            Showing results
+            {% if query %} for "<strong>{{ query }}</strong>"{% endif %}
+            {% if status %} with status "<strong>{{ status|title }}</strong>"{% endif %}
+        </div>
+    {% endif %}
 </div>
 
 <section class="requests-section">
-
     {% if requests %}
 
+    <div class="table-wrapper">
         <table>
             <thead>
                 <tr>
@@ -244,147 +308,193 @@
                     <th>Staff Remarks</th>
                 </tr>
             </thead>
-
             <tbody>
                 {% for item in requests %}
                 <tr>
-
+                    <td>{{ item.document_type.name }}</td>
+                    <td>{{ item.purpose|truncatewords:10 }}</td>
+                    <td>{{ item.submitted_at|date:"M d, Y" }}</td>
                     <td>
-                        {{ item.document_type.name }}
-                    </td>
-
-                    <td>
-                        {{ item.purpose|truncatewords:10 }}
-                    </td>
-
-                    <td>
-                        {{ item.submitted_at|date:"M d, Y" }}
-                    </td>
-
-                    <td>
-                        <span class="status status-{{ item.status }}">
-                            {{ item.get_status_display }}
-                        </span>
+                        <span class="status status-{{ item.status }}">{{ item.get_status_display }}</span>
 
                         {% if item.status == "released" %}
-
                             <div class="collection-notice">
                                 <strong>Ready for Collection!</strong>
-                                <p>
-                                    Your document is ready. Please visit
-                                    Barangay Mahayahay Hall to claim it.
-                                    Bring a valid ID and your request details.
-                                </p>
+                                <p>Your document is ready. Please visit Barangay Mahayahay Hall to claim it. Bring a valid ID and your request details.</p>
                             </div>
-
                         {% elif item.status == "rejected" %}
-
-                            <div class="status-notice">
-                                Your request was rejected. Please check
-                                the staff remarks for more information.
-                            </div>
-
+                            <div class="status-notice">Your request was rejected. Please check the staff remarks for more information.</div>
                         {% elif item.status == "approved" %}
-
-                            <div class="status-notice">
-                                Your request has been approved.
-                                Please complete payment if required.
-                            </div>
-
+                            <div class="status-notice">Your request has been approved. Complete payment if required.</div>
                         {% elif item.status == "under_review" %}
-
-                            <div class="status-notice">
-                                Your request is being reviewed by the
-                                barangay staff.
-                            </div>
-
+                            <div class="status-notice">Your request is being reviewed by the barangay staff.</div>
                         {% elif item.status == "pending" %}
-
-                            <div class="status-notice">
-                                Your request has been submitted and is
-                                waiting for staff review.
-                            </div>
-
+                            <div class="status-notice">Your request has been submitted and is waiting for staff review.</div>
                         {% endif %}
                     </td>
 
                     <td>
-
                         {% if item.document_type.fee > 0 %}
-
                             {% with payment=item.payments.last %}
+                                <strong>₱{{ item.document_type.fee|floatformat:2 }}</strong>
+                                <br><br>
 
                                 {% if payment and payment.status == "paid" %}
+                                    <span class="paid-label">✓ Paid</span>
 
-                                    <span class="paid-label">
-                                        ✓ Paid
-                                    </span>
+                                {% elif item.status == "rejected" %}
+                                    <span class="free-label">Request Rejected</span>
+
+                                {% elif item.status == "released" %}
+                                    <span class="paid-label">Document Released</span>
 
                                 {% elif item.status == "approved" %}
+                                    {% if payment and payment.status == "pending" %}
+                                        <span class="status status-pending">Payment Pending</span>
+                                        <div class="status-notice">Continue checkout if you have not completed payment.</div>
+                                        {% if payment.checkout_url %}
+                                            <a href="{{ payment.checkout_url }}" class="payment-button" target="_blank" rel="noopener noreferrer">Continue Payment</a>
+                                        {% else %}
+                                            <a href="{% url 'create_payment' item.id %}" class="payment-button">Pay Now</a>
+                                        {% endif %}
 
-                                    <div class="payment-box">
+                                    {% elif payment and payment.status == "failed" %}
+                                        <span class="status status-rejected">Payment Failed</span>
+                                        <div class="status-notice">Your previous payment was unsuccessful.</div>
+                                        <a href="{% url 'create_payment' item.id %}" class="payment-button">Try Again</a>
 
-                                        <strong>
-                                            ₱{{ item.document_type.fee|floatformat:2 }}
-                                        </strong>
-
-                                        <p>
-                                            Payment is required for this document.
-                                        </p>
-
-                                        <a
-                                            href="{% url 'create_payment' item.id %}"
-                                            class="payment-button"
-                                        >
-                                            Pay Now
-                                        </a>
-
-                                    </div>
+                                    {% else %}
+                                        <div class="payment-box">
+                                            <strong>Payment Required</strong>
+                                            <p>Your request has been approved. Please pay the required fee.</p>
+                                            <a href="{% url 'create_payment' item.id %}" class="payment-button">Pay Now</a>
+                                        </div>
+                                    {% endif %}
 
                                 {% else %}
-
-                                    <span class="free-label">
-                                        Payment after approval
-                                    </span>
-
+                                    <span class="free-label">Awaiting Approval</span>
                                 {% endif %}
-
                             {% endwith %}
-
                         {% else %}
-
-                            <span class="free-label">
-                                Free
-                            </span>
-
+                            <span class="free-label">Free</span>
                         {% endif %}
-
                     </td>
 
-                    <td class="remarks">
-                        {{ item.remarks|default:"No remarks yet."|linebreaksbr }}
-                    </td>
-
+                    <td class="remarks">{{ item.remarks|default:"No remarks yet."|linebreaksbr }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+
+    <div class="mobile-requests">
+        {% for item in requests %}
+        <div class="request-card">
+            <h3 class="request-card-title">{{ item.document_type.name }}</h3>
+
+            <div class="request-field">
+                <span class="field-label">Purpose</span>
+                <div class="field-value">{{ item.purpose }}</div>
+            </div>
+
+            <div class="request-field">
+                <span class="field-label">Date Submitted</span>
+                <div class="field-value">{{ item.submitted_at|date:"M d, Y" }}</div>
+            </div>
+
+            <div class="request-field">
+                <span class="field-label">Status</span>
+                <span class="status status-{{ item.status }}">{{ item.get_status_display }}</span>
+
+                {% if item.status == "released" %}
+                    <div class="mobile-collection-notice">
+                        <strong>Ready for Collection!</strong>
+                        <p>Your document is ready. Please visit Barangay Mahayahay Hall to claim it. Bring a valid ID and your request details.</p>
+                    </div>
+                {% elif item.status == "rejected" %}
+                    <div class="mobile-status-notice">Your request was rejected. Please check the staff remarks for more information.</div>
+                {% elif item.status == "approved" %}
+                    <div class="mobile-status-notice">Your request has been approved. Complete payment if required.</div>
+                {% elif item.status == "under_review" %}
+                    <div class="mobile-status-notice">Your request is being reviewed by the barangay staff.</div>
+                {% elif item.status == "pending" %}
+                    <div class="mobile-status-notice">Your request has been submitted and is waiting for staff review.</div>
+                {% endif %}
+            </div>
+
+            <div class="request-field">
+                <span class="field-label">Payment</span>
+                <div class="field-value">
+                    {% if item.document_type.fee > 0 %}
+                        {% with payment=item.payments.last %}
+                            <strong>₱{{ item.document_type.fee|floatformat:2 }}</strong>
+                            <br><br>
+
+                            {% if payment and payment.status == "paid" %}
+                                <span class="paid-label">✓ Paid</span>
+
+                            {% elif item.status == "rejected" %}
+                                <span class="free-label">Request Rejected</span>
+
+                            {% elif item.status == "released" %}
+                                <span class="paid-label">Document Released</span>
+
+                            {% elif item.status == "approved" %}
+                                {% if payment and payment.status == "pending" %}
+                                    <span class="status status-pending">Payment Pending</span>
+                                    <div class="mobile-status-notice">Continue checkout if you have not completed payment.</div>
+                                    {% if payment.checkout_url %}
+                                        <a href="{{ payment.checkout_url }}" class="payment-button" target="_blank" rel="noopener noreferrer">Continue Payment</a>
+                                    {% else %}
+                                        <a href="{% url 'create_payment' item.id %}" class="payment-button">Pay Now</a>
+                                    {% endif %}
+
+                                {% elif payment and payment.status == "failed" %}
+                                    <span class="status status-rejected">Payment Failed</span>
+                                    <div class="mobile-status-notice">Your previous payment was unsuccessful.</div>
+                                    <a href="{% url 'create_payment' item.id %}" class="payment-button">Try Again</a>
+
+                                {% else %}
+                                    <div class="mobile-payment-box">
+                                        <strong>Payment Required</strong>
+                                        <p>Your request has been approved. Please pay the required fee.</p>
+                                        <a href="{% url 'create_payment' item.id %}" class="payment-button">Pay Now</a>
+                                    </div>
+                                {% endif %}
+
+                            {% else %}
+                                <span class="free-label">Awaiting Approval</span>
+                            {% endif %}
+                        {% endwith %}
+                    {% else %}
+                        <span class="free-label">Free</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="request-field">
+                <span class="field-label">Staff Remarks</span>
+                <div class="field-value">{{ item.remarks|default:"No remarks yet."|linebreaksbr }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 
     {% else %}
-
         <p class="empty">
-            You haven't submitted any document requests yet.
+            {% if query or status %}
+                No document requests matched your search or filter.
+            {% else %}
+                You haven't submitted any document requests yet.
+            {% endif %}
         </p>
 
-        <a
-            href="{% url 'resident_dashboard' %}"
-            class="request-button"
-        >
-            Browse Available Documents
-        </a>
-
+        {% if query or status %}
+            <a href="{% url 'my_requests' %}" class="request-button">Show All Requests</a>
+        {% else %}
+            <a href="{% url 'resident_dashboard' %}" class="request-button">Browse Available Documents</a>
+        {% endif %}
     {% endif %}
-
 </section>
 
 {% endblock %}

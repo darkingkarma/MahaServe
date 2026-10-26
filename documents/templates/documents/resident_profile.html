@@ -120,12 +120,14 @@
 
 {% block content %}
 <div class="profile-container">
+
     <div class="page-heading">
         <h1>My Profile</h1>
         <p>View and update your resident information.</p>
     </div>
 
     <section class="profile-card">
+
         <h2>Account Information</h2>
 
         <div class="account-info">
@@ -133,6 +135,7 @@
                 <strong>Username:</strong>
                 {{ request.user.username }}
             </p>
+
             <p>
                 <strong>Email:</strong>
                 {{ request.user.email|default:"Not provided" }}
@@ -142,6 +145,40 @@
         <form method="post">
             {% csrf_token %}
 
+            <!-- PERSONAL INFORMATION -->
+            <h2>Personal Information</h2>
+
+            <div class="form-row">
+                <div>
+                    <label for="first_name">First Name</label>
+                    <input
+                        type="text"
+                        id="first_name"
+                        name="first_name"
+                        maxlength="150"
+                        autocomplete="given-name"
+                        value="{{ request.user.first_name }}"
+                        placeholder="Enter your first name"
+                        required
+                    >
+                </div>
+
+                <div>
+                    <label for="last_name">Last Name</label>
+                    <input
+                        type="text"
+                        id="last_name"
+                        name="last_name"
+                        maxlength="150"
+                        autocomplete="family-name"
+                        value="{{ request.user.last_name }}"
+                        placeholder="Enter your last name"
+                        required
+                    >
+                </div>
+            </div>
+
+            <!-- RESIDENT INFORMATION -->
             <h2>Resident Information</h2>
 
             <label for="contact_number">Contact Number</label>

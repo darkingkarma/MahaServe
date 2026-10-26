@@ -1,0 +1,509 @@
+{% extends "documents/resident_base.html" %}
+
+{% block title %}Search Documents | MahaServe{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-page {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .search-heading {
+        margin-bottom: 24px;
+    }
+
+    .search-heading h1 {
+        margin: 0 0 8px;    
+        color: #17365d;
+        font-size: clamp(23px, 4vw, 30px);
+        overflow-wrap: anywhere;
+    }
+
+    .search-heading p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 14px;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+    }
+
+    /* Cards keep a consistent width, even with one result */
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: stretch;
+        gap: 20px;
+        justify-content: start;
+    }
+
+    .result-card {
+        width: 100%;
+        max-width: 360px;
+        min-width: 0;
+        height: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+        border: 1px solid #e1e6ed;
+        border-radius: 10px;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    .result-card:hover {
+        box-shadow: 0 5px 18px rgba(23, 54, 93, 0.09);
+        transform: translateY(-2px);
+    }
+
+    /* Clickable document image */
+    .result-image-button {
+        display: block;
+        width: 100%;
+        padding: 0;
+        border: none;
+        background: #edf1f6;
+        cursor: zoom-in;
+        overflow: hidden;
+    }
+
+    .result-image {
+        display: block;
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        transition: transform 0.25s;
+    }
+
+    .result-image-button:hover .result-image {
+        transform: scale(1.04);
+    }
+
+    .no-image {
+        width: 100%;
+        height: 180px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #edf1f6;
+        color: #17365d;
+        font-size: 38px;
+    }
+
+    .result-body {
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .result-body h2 {
+        margin: 0 0 10px;
+        color: #17365d;
+        font-size: 18px;
+        line-height: 1.45;
+        overflow-wrap: anywhere;
+    }
+
+    /* Description expands naturally when long */
+    .result-description {
+        margin: 0 0 16px;
+        color: #687386;
+        font-size: 14px;
+        line-height: 1.7;
+        overflow-wrap: anywhere;
+        white-space: normal;
+        flex-grow: 1;
+    }
+
+    .result-fee {
+        margin: 0 0 12px;
+        color: #17365d;
+        font-size: 14px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .result-status {
+        display: inline-block;
+        align-self: flex-start;
+        margin: 0 0 14px;
+        padding: 5px 9px;
+        border-radius: 5px;
+        background: #e7f6ec;
+        color: #247342;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .result-status.unavailable {
+        background: #fce8e8;
+        color: #a52b2b;
+    }
+
+    .result-button {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        margin-top: auto;
+        padding: 12px 10px;
+        border: 0;
+        border-radius: 6px;
+        background: #17365d;
+        color: #fff;
+        text-align: center;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .result-button:hover {
+        background: #244b78;
+    }
+
+    .result-button.disabled {
+        background: #e5e7eb;
+        color: #6b7280;
+        cursor: not-allowed;
+    }
+
+    /* No results */
+    .empty-results {
+        padding: 30px 20px;
+        border: 1px solid #e1e6ed;
+        border-radius: 10px;
+        background: #fff;
+        text-align: center;
+    }
+
+    .empty-results h2 {
+        margin: 0 0 10px;
+        color: #17365d;
+        font-size: 20px;
+    }
+
+    .empty-results p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 24px;
+        color: #17365d;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    /* Image preview modal */
+    .image-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.82);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .image-modal.show {
+        display: flex;
+    }
+
+    .modal-content {
+        position: relative;
+        width: min(900px, 100%);
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .modal-image {
+        display: block;
+        max-width: 100%;
+        max-height: 78vh;
+        object-fit: contain;
+        border-radius: 8px;
+        background: #fff;
+    }
+
+    .modal-caption {
+        margin: 12px 0 0;
+        color: #fff;
+        text-align: center;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: -16px;
+        right: -12px;
+        z-index: 2;
+        width: 40px;
+        height: 40px;
+        border: none;
+        border-radius: 50%;
+        background: #fff;
+        color: #17365d;
+        font-size: 28px;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    .modal-close:hover {
+        background: #e5e7eb;
+    }
+
+    /* Tablet: two columns */
+    @media (max-width: 900px) {
+        .results-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    /* Mobile: one normal-width card */
+    @media (max-width: 600px) {
+        .results-grid {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 16px;
+        }
+
+        .result-card {
+            max-width: 360px;
+        }
+
+        .result-image,
+        .no-image {
+            height: 200px;
+        }
+
+        .result-body {
+            padding: 16px;
+        }
+
+        .image-modal {
+            padding: 14px;
+        }
+
+        .modal-close {
+            top: -12px;
+            right: -4px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .result-card,
+        .result-image {
+            transition: none;
+        }
+
+        .result-card:hover {
+            transform: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-page">
+
+    <div class="search-heading">
+        <h1>Search Documents</h1>
+
+        {% if query %}
+            <p>Results for "{{ query }}"</p>
+        {% else %}
+            <p>Browse documents available through MahaServe.</p>
+        {% endif %}
+    </div>
+
+    {% if document_types %}
+        <div class="results-grid">
+            {% for document in document_types %}
+                <article class="result-card">
+
+                    {% if document.image %}
+                        <button
+                            type="button"
+                            class="result-image-button"
+                            data-image="{{ document.image.url }}"
+                            data-title="{{ document.name }}"
+                            aria-label="Preview image of {{ document.name }}"
+                        >
+                            <img
+                                src="{{ document.image.url }}"
+                                alt="{{ document.name }}"
+                                class="result-image"
+                                loading="lazy"
+                            >
+                        </button>
+                    {% else %}
+                        <div class="no-image" aria-hidden="true">
+                            &#128196;
+                        </div>
+                    {% endif %}
+
+                    <div class="result-body">
+                        <h2>{{ document.name }}</h2>
+
+                        <p class="result-description">
+                            {{ document.description|default:"No description available." }}
+                        </p>
+
+                        <p class="result-fee">
+                            <strong>Fee:</strong>
+                            ₱{{ document.fee|floatformat:2 }}
+                        </p>
+
+                        {% if document.is_available %}
+                            <span class="result-status">Available</span>
+
+                            <a
+                                class="result-button"
+                                href="{% url 'request_document' document.id %}"
+                            >
+                                Request Document
+                            </a>
+                        {% else %}
+                            <span class="result-status unavailable">
+                                Currently Unavailable
+                            </span>
+
+                            <button
+                                class="result-button disabled"
+                                type="button"
+                                disabled
+                            >
+                                Requests Unavailable
+                            </button>
+                        {% endif %}
+                    </div>
+
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-results">
+            <h2>No documents found</h2>
+            <p>
+                {% if query %}
+                    Try another document name or keyword.
+                {% else %}
+                    No documents have been added yet.
+                {% endif %}
+            </p>
+        </div>
+    {% endif %}
+
+    <a class="back-link" href="{% url 'resident_dashboard' %}">
+        &larr; Back to Dashboard
+    </a>
+
+</div>
+
+<!-- Image Preview Modal -->
+<div
+    class="image-modal"
+    id="imageModal"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Document image preview"
+    aria-hidden="true"
+>
+    <div class="modal-content">
+        <button
+            type="button"
+            class="modal-close"
+            id="modalClose"
+            aria-label="Close image preview"
+        >&times;</button>
+
+        <img
+            src=""
+            alt=""
+            class="modal-image"
+            id="modalImage"
+        >
+
+        <p class="modal-caption" id="modalCaption"></p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const modal = document.getElementById("imageModal");
+        const modalImage = document.getElementById("modalImage");
+        const modalCaption = document.getElementById("modalCaption");
+        const closeButton = document.getElementById("modalClose");
+        const imageButtons = document.querySelectorAll(".result-image-button");
+
+        let previousFocus = null;
+
+        function openModal(imageUrl, title, trigger) {
+            previousFocus = trigger;
+
+            modalImage.src = imageUrl;
+            modalImage.alt = title;
+            modalCaption.textContent = title;
+
+            modal.classList.add("show");
+            modal.setAttribute("aria-hidden", "false");
+            document.body.style.overflow = "hidden";
+
+            closeButton.focus();
+        }
+
+        function closeModal() {
+            modal.classList.remove("show");
+            modal.setAttribute("aria-hidden", "true");
+            modalImage.src = "";
+            document.body.style.overflow = "";
+
+            if (previousFocus) {
+                previousFocus.focus();
+            }
+        }
+
+        imageButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                openModal(
+                    button.dataset.image,
+                    button.dataset.title,
+                    button
+                );
+            });
+        });
+
+        closeButton.addEventListener("click", closeModal);
+
+        modal.addEventListener("click", function (event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (
+                event.key === "Escape" &&
+                modal.classList.contains("show")
+            ) {
+                closeModal();
+            }
+        });
+    });
+</script>
+{% endblock %}

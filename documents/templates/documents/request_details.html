@@ -1,22 +1,23 @@
+
 {% extends "documents/base.html" %}
 
 {% block title %}Request Details | MahaServe{% endblock %}
-
 {% block page_heading %}Document Request Details{% endblock %}
 
 {% block content %}
 
 <style>
+    .details-page,
+    .details-page * {
+        box-sizing: border-box;
+    }
+
     .details-page {
         width: 100%;
         max-width: 1050px;
-        margin: 0 auto;
         min-width: 0;
+        margin: 0 auto;
         color: #172554;
-    }
-
-    * {
-        box-sizing: border-box;
     }
 
     .page-intro {
@@ -43,6 +44,7 @@
     }
 
     .details-card {
+        min-width: 0;
         padding: 28px;
         background: #fff;
         border: 1px solid #e8edf5;
@@ -123,6 +125,7 @@
     }
 
     .detail-value {
+        min-width: 0;
         color: #263445;
         font-size: 14px;
         font-weight: 650;
@@ -140,13 +143,15 @@
         display: inline-flex;
         align-items: center;
         gap: 7px;
+        max-width: 100%;
         padding: 6px 11px;
         border-radius: 20px;
         background: #e8eef7;
         color: #17365d;
         font-size: 12px;
         font-weight: 750;
-        white-space: nowrap;
+        white-space: normal;
+        overflow-wrap: anywhere;
     }
 
     .status::before {
@@ -173,7 +178,8 @@
         color: #166534;
     }
 
-    .status-rejected {
+    .status-rejected,
+    .status-failed {
         background: #fee2e2;
         color: #b91c1c;
     }
@@ -183,11 +189,22 @@
         color: #7e22ce;
     }
 
-    .remarks {
-        font-weight: 400;
-        white-space: pre-wrap;
+    .status-paid {
+        background: #dcfce7;
+        color: #166534;
     }
 
+    .status-unpaid {
+        background: #fff7df;
+        color: #a16207;
+    }
+
+    .status-no-payment {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .remarks,
     .purpose-value {
         font-weight: 400;
         white-space: pre-wrap;
@@ -197,6 +214,14 @@
         color: #166534;
         font-size: 18px;
         font-weight: 800;
+    }
+
+    .payment-note {
+        margin-top: 8px;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.6;
+        font-weight: 400;
     }
 
     .actions {
@@ -224,7 +249,7 @@
         font-weight: 750;
         text-align: center;
         text-decoration: none;
-        transition: background 0.2s, transform 0.2s;
+        transition: background 0.2s;
     }
 
     .action-button:hover {
@@ -247,26 +272,12 @@
             border-radius: 13px;
         }
 
-        .details-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
         .details-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 11px;
         }
 
         .detail-item {
             padding: 14px;
-        }
-
-        .detail-item.full {
-            grid-column: 1 / -1;
-        }
-
-        .section-title {
-            margin-top: 22px;
         }
     }
 
@@ -284,12 +295,17 @@
             padding: 16px;
         }
 
+        .details-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
         .details-header h2 {
             font-size: 22px;
         }
 
         .details-grid {
-            grid-template-columns: 1fr;
+            grid-template-columns: minmax(0, 1fr);
             gap: 10px;
         }
 
@@ -316,7 +332,6 @@
         .action-button {
             width: 100%;
             min-height: 45px;
-            box-sizing: border-box;
         }
     }
 </style>
@@ -324,7 +339,7 @@
 <div class="details-page">
 
     <p class="page-intro">
-        Review the resident's application information, document fee,
+        Review the resident's application, document fee, payment information,
         current status, and staff remarks.
     </p>
 
@@ -335,13 +350,10 @@
 
     <section class="details-card">
 
-        <!-- Request header -->
         <div class="details-header">
             <div>
                 <h2>Document Request Details</h2>
-                <p>
-                    Complete information about this resident's application.
-                </p>
+                <p>Complete information about this resident's application.</p>
             </div>
 
             <span class="request-number">
@@ -349,7 +361,7 @@
             </span>
         </div>
 
-        <!-- Request information -->
+        <!-- Request Information -->
         <h3 class="section-title">Request Information</h3>
 
         <div class="details-grid">
@@ -387,9 +399,8 @@
             <div class="detail-item">
                 <span class="detail-label">Date Submitted</span>
                 <div class="detail-value">
-                    {{ document_request.submitted_at|date:"M d, Y" }}
-                    <br>
-                    <span style="color: #64748b; font-size: 12px; font-weight: 400;">
+                    {{ document_request.submitted_at|date:"M d, Y" }}<br>
+                    <span style="color:#64748b;font-size:12px;font-weight:400">
                         {{ document_request.submitted_at|date:"h:i A" }}
                     </span>
                 </div>
@@ -399,9 +410,8 @@
                 <span class="detail-label">Last Updated</span>
                 <div class="detail-value">
                     {% if document_request.updated_at %}
-                        {{ document_request.updated_at|date:"M d, Y" }}
-                        <br>
-                        <span style="color: #64748b; font-size: 12px; font-weight: 400;">
+                        {{ document_request.updated_at|date:"M d, Y" }}<br>
+                        <span style="color:#64748b;font-size:12px;font-weight:400">
                             {{ document_request.updated_at|date:"h:i A" }}
                         </span>
                     {% else %}
@@ -412,14 +422,64 @@
 
             <div class="detail-item full">
                 <span class="detail-label">Purpose of Request</span>
-                <div class="detail-value purpose-value">
-                    {{ document_request.purpose|default:"No purpose provided." }}
+                <div class="detail-value purpose-value">{{ document_request.purpose|default:"No purpose provided." }}</div>
+            </div>
+
+        </div>
+
+        <!-- Payment Information -->
+        <h3 class="section-title">Payment Information</h3>
+
+        <div class="details-grid">
+
+            <div class="detail-item">
+                <span class="detail-label">Payment Status</span>
+                <div class="detail-value">
+                    {% if latest_payment %}
+                        {% if latest_payment.status == "paid" %}
+                            <span class="status status-paid">Paid</span>
+                        {% elif latest_payment.status == "failed" %}
+                            <span class="status status-failed">Failed</span>
+                        {% else %}
+                            <span class="status status-unpaid">Pending</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="status status-no-payment">No Payment Record</span>
+                    {% endif %}
+                </div>
+
+                <div class="payment-note">
+                    Status shown is based on the latest payment record saved in the database.
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <span class="detail-label">Payment Amount</span>
+                <div class="detail-value fee-value">
+                    {% if latest_payment %}
+                        ₱{{ latest_payment.amount|floatformat:2 }}
+                    {% else %}
+                        ₱0.00
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-item full">
+                <span class="detail-label">Payment Reference</span>
+                <div class="detail-value">
+                    {% if latest_payment and latest_payment.checkout_session_id %}
+                        {{ latest_payment.checkout_session_id }}
+                    {% elif latest_payment and latest_payment.payment_intent_id %}
+                        {{ latest_payment.payment_intent_id }}
+                    {% else %}
+                        No payment reference available.
+                    {% endif %}
                 </div>
             </div>
 
         </div>
 
-        <!-- Resident information -->
+        <!-- Resident Information -->
         <h3 class="section-title">Resident Information</h3>
 
         <div class="details-grid">
@@ -457,7 +517,7 @@
 
         </div>
 
-        <!-- Staff remarks -->
+        <!-- Staff Remarks -->
         <h3 class="section-title">Staff Remarks</h3>
 
         <div class="details-grid">
@@ -467,7 +527,7 @@
             </div>
         </div>
 
-        <!-- Navigation actions -->
+        <!-- Navigation -->
         <div class="actions">
             <a class="action-button" href="{% url 'manage_requests' %}">
                 &larr; Manage Requests
@@ -479,7 +539,6 @@
         </div>
 
     </section>
-
 </div>
 
 {% endblock %}

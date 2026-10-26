@@ -40,7 +40,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* DESKTOP SIDEBAR */
+        /* SIDEBAR */
         .sidebar {
             position: fixed;
             top: 0;
@@ -105,7 +105,6 @@
             font-weight: 600;
         }
 
-        /* LINE ICONS */
         .nav-icon {
             display: inline-flex;
             align-items: center;
@@ -125,6 +124,27 @@
             stroke-width: 1.8;
             stroke-linecap: round;
             stroke-linejoin: round;
+        }
+
+        /* SIDEBAR NOTIFICATION BADGE */
+        .sidebar-notification-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 21px;
+            height: 21px;
+            margin-left: auto;
+            padding: 2px 6px;
+            border-radius: 20px;
+            background: #ef4444;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .sidebar a.active .sidebar-notification-badge {
+            background: var(--navy);
+            color: white;
         }
 
         /* LOGOUT */
@@ -183,12 +203,58 @@
             font-weight: 600;
         }
 
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 16px;
+            margin-left: auto;
+        }
+
         .user-info {
             max-width: 45%;
             color: var(--muted);
             font-size: 13px;
             text-align: right;
             overflow-wrap: anywhere;
+        }
+
+        /* TOP BAR NOTIFICATION BELL */
+        .notification-link {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            flex-shrink: 0;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: white;
+            color: var(--navy);
+            font-size: 23px;
+            text-decoration: none;
+        }
+
+        .notification-link:hover {
+            background: var(--page-bg);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            min-width: 19px;
+            height: 19px;
+            padding: 2px 5px;
+            border: 2px solid white;
+            border-radius: 20px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            line-height: 13px;
+            text-align: center;
         }
 
         .content {
@@ -199,46 +265,84 @@
             padding: 28px;
         }
 
-        /* SIMPLE DJANGO MESSAGES */
-        .messages {
-            display: grid;
-            gap: 8px;
-            margin-bottom: 18px;
+        /* DJANGO MESSAGES */
+        .messages-container {
+            margin-bottom: 20px;
         }
 
-        .message {
-            padding: 10px 13px;
-            border: 1px solid var(--border);
+        .alert {
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 10px;
+            padding: 12px 15px 18px;
+            border: 1px solid transparent;
             border-radius: 6px;
-            background: white;
-            color: #334155;
-            font-size: 13px;
+            font-size: 14px;
             line-height: 1.5;
             overflow-wrap: anywhere;
         }
 
-        .message.success {
-            border-color: #bbf7d0;
-            background: #f0fdf4;
-            color: #166534;
+        .alert.success {
+            background: #e8f7ed;
+            color: #21663a;
+            border-color: #b8e4c5;
         }
 
-        .message.error {
-            border-color: #fecaca;
-            background: #fef2f2;
-            color: #991b1b;
+        .alert.error {
+            background: #fff1f0;
+            color: #a12622;
+            border-color: #f3c4c0;
         }
 
-        .message.warning {
-            border-color: #fde68a;
-            background: #fffbeb;
-            color: #92400e;
+        .alert.warning {
+            background: #fff8e5;
+            color: #805b00;
+            border-color: #f0dda1;
         }
 
-        .message.info {
-            border-color: #bfdbfe;
-            background: #eff6ff;
-            color: #1d4ed8;
+        .alert.info {
+            background: #eaf3ff;
+            color: #244e89;
+            border-color: #c4daf8;
+        }
+
+        .alert-progress {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 3px;
+            background: currentColor;
+            opacity: 0.35;
+            transform-origin: left;
+            animation: messageCountdown 5s linear forwards;
+        }
+
+        @keyframes messageCountdown {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
+
+        .alert.message-hide {
+            animation: messageFadeOut 0.4s ease forwards;
+        }
+
+        @keyframes messageFadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+                max-height: 200px;
+                margin-bottom: 10px;
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-5px);
+                max-height: 0;
+                margin-bottom: 0;
+                padding-top: 0;
+                padding-bottom: 0;
+                border-width: 0;
+            }
         }
 
         /* SHARED BUTTONS */
@@ -271,7 +375,6 @@
             max-width: 100%;
         }
 
-        /* HAMBURGER BUTTON: HIDDEN ON DESKTOP */
         .menu-toggle {
             display: none;
             align-items: center;
@@ -291,12 +394,10 @@
             background: var(--page-bg);
         }
 
-        /* BACKGROUND OVERLAY */
         .sidebar-overlay {
             display: none;
         }
 
-        /* TABLET */
         @media (max-width: 900px) and (min-width: 601px) {
             .sidebar {
                 width: 210px;
@@ -313,9 +414,12 @@
             .topbar {
                 padding: 16px 20px;
             }
+
+            .topbar-right {
+                gap: 10px;
+            }
         }
 
-        /* MOBILE HAMBURGER NAVIGATION */
         @media (max-width: 600px) {
             .sidebar {
                 width: 260px;
@@ -333,7 +437,6 @@
 
             .brand {
                 padding: 0 12px 24px;
-                text-align: left;
             }
 
             .brand h2 {
@@ -392,8 +495,18 @@
                 overflow-wrap: anywhere;
             }
 
+            .topbar-right {
+                gap: 8px;
+                margin-left: 0;
+            }
+
+            .notification-link {
+                width: 38px;
+                height: 38px;
+            }
+
             .user-info {
-                max-width: 35%;
+                max-width: 100px;
                 font-size: 10px;
                 text-align: right;
             }
@@ -402,9 +515,9 @@
                 padding: 16px 12px;
             }
 
-            .message {
-                padding: 10px 11px;
-                font-size: 12px;
+            .alert {
+                padding: 12px 13px 18px;
+                font-size: 13px;
             }
 
             .btn {
@@ -412,7 +525,6 @@
                 font-size: 13px;
             }
 
-            /* Scroll wide tables inside their own container */
             .table-responsive {
                 width: 100%;
                 overflow-x: auto;
@@ -423,7 +535,6 @@
                 min-width: 550px;
             }
 
-            /* DARK OVERLAY WHEN MENU IS OPEN */
             .sidebar-overlay.visible {
                 display: block;
                 position: fixed;
@@ -437,6 +548,11 @@
             .sidebar {
                 transition: none;
             }
+
+            .alert-progress,
+            .alert.message-hide {
+                animation: none;
+            }
         }
     </style>
 
@@ -444,202 +560,296 @@
 </head>
 
 <body>
-    <!-- STAFF SIDEBAR -->
-    <aside class="sidebar" id="staffSidebar">
-        <div class="brand">
-            <h2>MahaServe</h2>
-            <p>Barangay Mahayahay</p>
-        </div>
 
-        <p class="nav-label">Main Menu</p>
+<!-- STAFF SIDEBAR -->
+<aside class="sidebar" id="staffSidebar">
+    <div class="brand">
+        <h2>MahaServe</h2>
+        <p>Barangay Mahayahay</p>
+    </div>
 
-        <!-- DASHBOARD -->
-        <a href="{% url 'admin_dashboard' %}"
-           aria-label="Dashboard"
-           title="Dashboard"
-           class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+    <p class="nav-label">Main Menu</p>
+
+    <a
+        href="{% url 'admin_dashboard' %}"
+        aria-label="Dashboard"
+        title="Dashboard"
+        class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}"
+    >
+        <span class="nav-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="3" y="3" width="8" height="8" rx="1.5"/>
+                <rect x="14" y="3" width="7" height="5" rx="1.5"/>
+                <rect x="14" y="11" width="7" height="10" rx="1.5"/>
+                <rect x="3" y="14" width="8" height="7" rx="1.5"/>
+            </svg>
+        </span>
+        <span class="nav-text">Dashboard</span>
+    </a>
+
+    <a
+        href="{% url 'manage_documents' %}"
+        aria-label="Manage Documents"
+        title="Manage Documents"
+        class="{% if request.resolver_match.url_name == 'manage_documents' or request.resolver_match.url_name == 'add_document' or request.resolver_match.url_name == 'edit_document' %}active{% endif %}"
+    >
+        <span class="nav-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <path d="M14 2v6h6M8 13h8M8 17h8"/>
+            </svg>
+        </span>
+        <span class="nav-text">Manage Documents</span>
+    </a>
+
+    <a
+        href="{% url 'manage_requests' %}"
+        aria-label="Manage Requests"
+        title="Manage Requests"
+        class="{% if request.resolver_match.url_name == 'manage_requests' or request.resolver_match.url_name == 'request_details' or request.resolver_match.url_name == 'update_request' %}active{% endif %}"
+    >
+        <span class="nav-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-4"/>
+                <rect x="9" y="3" width="6" height="4" rx="1"/>
+                <path d="m8 13 2 2 5-5M8 18h8"/>
+            </svg>
+        </span>
+        <span class="nav-text">Manage Requests</span>
+    </a>
+
+    <!-- STAFF NOTIFICATIONS -->
+    <a
+        href="{% url 'notification_list' %}"
+        aria-label="Notifications"
+        title="Notifications"
+        class="{% if request.resolver_match.url_name == 'notification_list' %}active{% endif %}"
+    >
+        <span class="nav-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+                <path d="M10 21h4"/>
+            </svg>
+        </span>
+        <span class="nav-text">Notifications</span>
+
+        {% if unread_notification_count %}
+            <span class="sidebar-notification-badge">
+                {% if unread_notification_count > 99 %}
+                    99+
+                {% else %}
+                    {{ unread_notification_count }}
+                {% endif %}
+            </span>
+        {% endif %}
+    </a>
+
+    <p class="nav-label">Account</p>
+
+    <a
+        href="{% url 'landing' %}"
+        aria-label="View Website"
+        title="View Website"
+    >
+        <span class="nav-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m3 10 9-7 9 7"/>
+                <path d="M5 9v12h14V9M9 21v-8h6v8"/>
+            </svg>
+        </span>
+        <span class="nav-text">View Website</span>
+    </a>
+
+    <form method="POST" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="logout-btn">
             <span class="nav-icon">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="3" y="3" width="8" height="8" rx="1.5"/>
-                    <rect x="14" y="3" width="7" height="5" rx="1.5"/>
-                    <rect x="14" y="11" width="7" height="10" rx="1.5"/>
-                    <rect x="3" y="14" width="8" height="7" rx="1.5"/>
+                    <path d="M10 17l5-5-5-5M15 12H3"/>
+                    <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/>
                 </svg>
             </span>
-            <span class="nav-text">Dashboard</span>
-        </a>
+            <span class="nav-text">Logout</span>
+        </button>
+    </form>
+</aside>
 
-        <!-- MANAGE DOCUMENTS -->
-        <a href="{% url 'manage_documents' %}"
-           aria-label="Manage Documents"
-           title="Manage Documents"
-           class="{% if request.resolver_match.url_name == 'manage_documents' or request.resolver_match.url_name == 'add_document' or request.resolver_match.url_name == 'edit_document' %}active{% endif %}">
-            <span class="nav-icon">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <path d="M14 2v6h6M8 13h8M8 17h8"/>
-                </svg>
-            </span>
-            <span class="nav-text">Manage Documents</span>
-        </a>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-        <!-- MANAGE REQUESTS -->
-        <a href="{% url 'manage_requests' %}"
-           aria-label="Manage Requests"
-           title="Manage Requests"
-           class="{% if request.resolver_match.url_name == 'manage_requests' or request.resolver_match.url_name == 'request_details' or request.resolver_match.url_name == 'update_request' %}active{% endif %}">
-            <span class="nav-icon">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M9 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-4"/>
-                    <rect x="9" y="3" width="6" height="4" rx="1"/>
-                    <path d="m8 13 2 2 5-5M8 18h8"/>
-                </svg>
-            </span>
-            <span class="nav-text">Manage Requests</span>
-        </a>
+<div class="main">
 
-        <p class="nav-label">Account</p>
+    <!-- TOP BAR -->
+    <header class="topbar">
 
-        <!-- PUBLIC WEBSITE -->
-        <a href="{% url 'landing' %}"
-           aria-label="View Website"
-           title="View Website">
-            <span class="nav-icon">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="m3 10 9-7 9 7"/>
-                    <path d="M5 9v12h14V9M9 21v-8h6v8"/>
-                </svg>
-            </span>
-            <span class="nav-text">View Website</span>
-        </a>
+        <button
+            type="button"
+            class="menu-toggle"
+            id="menuToggle"
+            aria-label="Open navigation menu"
+            aria-expanded="false"
+            aria-controls="staffSidebar"
+        >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </button>
 
-        <!-- LOGOUT -->
-        <form method="POST" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button type="submit" class="logout-btn">
-                <span class="nav-icon">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M10 17l5-5-5-5M15 12H3"/>
-                        <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/>
-                    </svg>
-                </span>
-                <span class="nav-text">Logout</span>
-            </button>
-        </form>
-    </aside>
+        <h3>{% block page_heading %}Staff Dashboard{% endblock %}</h3>
 
-    <!-- MOBILE SIDEBAR OVERLAY -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <div class="topbar-right">
 
-    <!-- MAIN AREA -->
-    <div class="main">
+            <a
+                href="{% url 'notification_list' %}"
+                class="notification-link"
+                aria-label="Notifications{% if unread_notification_count %}, {{ unread_notification_count }} unread{% endif %}"
+                title="Notifications"
+            >
+                <span aria-hidden="true">♧</span>
 
-        <!-- TOP BAR -->
-        <header class="topbar">
-            <!-- MOBILE HAMBURGER -->
-            <button
-                type="button"
-                class="menu-toggle"
-                id="menuToggle"
-                aria-label="Open navigation menu"
-                aria-expanded="false"
-                aria-controls="staffSidebar">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
-
-            <h3>{% block page_heading %}Staff Dashboard{% endblock %}</h3>
+                {% if unread_notification_count %}
+                    <span class="notification-badge">
+                        {% if unread_notification_count > 99 %}
+                            99+
+                        {% else %}
+                            {{ unread_notification_count }}
+                        {% endif %}
+                    </span>
+                {% endif %}
+            </a>
 
             <div class="user-info">
                 Logged in as: {{ request.user.username }}
             </div>
-        </header>
 
-        <!-- PAGE CONTENT -->
-        <main class="content">
+        </div>
+    </header>
 
-            <!-- SIMPLE DJANGO MESSAGES -->
-            {% if messages %}
-                <div class="messages" aria-live="polite">
-                    {% for message in messages %}
-                        <div class="message {{ message.tags }}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+    <!-- PAGE CONTENT -->
+    <main class="content">
 
-            {% block content %}{% endblock %}
+        {% if messages %}
+            <div
+                class="messages-container"
+                id="messagesContainer"
+                aria-live="polite"
+            >
+                {% for message in messages %}
+                    <div class="alert {{ message.tags|default:'info' }}">
+                        {{ message }}
+                        <div class="alert-progress" aria-hidden="true"></div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
 
-        </main>
-    </div>
+        {% block content %}{% endblock %}
 
-    {% block extra_js %}{% endblock %}
+    </main>
+</div>
 
-    <!-- HAMBURGER MENU FUNCTIONALITY -->
-    <script>
-        (function () {
-            const menuToggle = document.getElementById("menuToggle");
-            const sidebar = document.getElementById("staffSidebar");
-            const overlay = document.getElementById("sidebarOverlay");
+{% block extra_js %}{% endblock %}
 
-            if (!menuToggle || !sidebar || !overlay) {
-                return;
+<script>
+    /* MOBILE SIDEBAR */
+    (function () {
+        const menuToggle = document.getElementById("menuToggle");
+        const sidebar = document.getElementById("staffSidebar");
+        const overlay = document.getElementById("sidebarOverlay");
+
+        if (!menuToggle || !sidebar || !overlay) {
+            return;
+        }
+
+        function isMobile() {
+            return window.matchMedia("(max-width: 600px)").matches;
+        }
+
+        function openMenu() {
+            if (!isMobile()) return;
+
+            sidebar.classList.add("open");
+            overlay.classList.add("visible");
+
+            menuToggle.setAttribute("aria-expanded", "true");
+            menuToggle.setAttribute(
+                "aria-label",
+                "Close navigation menu"
+            );
+
+            document.body.classList.add("menu-open");
+        }
+
+        function closeMenu() {
+            sidebar.classList.remove("open");
+            overlay.classList.remove("visible");
+
+            menuToggle.setAttribute("aria-expanded", "false");
+            menuToggle.setAttribute(
+                "aria-label",
+                "Open navigation menu"
+            );
+
+            document.body.classList.remove("menu-open");
+        }
+
+        menuToggle.addEventListener("click", function () {
+            if (sidebar.classList.contains("open")) {
+                closeMenu();
+            } else {
+                openMenu();
             }
+        });
 
-            function isMobile() {
-                return window.matchMedia("(max-width: 600px)").matches;
+        overlay.addEventListener("click", closeMenu);
+
+        sidebar.querySelectorAll("a").forEach(function (link) {
+            link.addEventListener("click", closeMenu);
+        });
+
+        sidebar.querySelectorAll("form").forEach(function (form) {
+            form.addEventListener("submit", closeMenu);
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                closeMenu();
             }
+        });
 
-            function openMenu() {
-                if (!isMobile()) return;
-
-                sidebar.classList.add("open");
-                overlay.classList.add("visible");
-                menuToggle.setAttribute("aria-expanded", "true");
-                menuToggle.setAttribute("aria-label", "Close navigation menu");
-                document.body.classList.add("menu-open");
+        window.addEventListener("resize", function () {
+            if (!isMobile()) {
+                closeMenu();
             }
+        });
+    })();
 
-            function closeMenu() {
-                sidebar.classList.remove("open");
-                overlay.classList.remove("visible");
-                menuToggle.setAttribute("aria-expanded", "false");
-                menuToggle.setAttribute("aria-label", "Open navigation menu");
-                document.body.classList.remove("menu-open");
-            }
+    /* AUTO-DISMISS DJANGO MESSAGES */
+    document.addEventListener("DOMContentLoaded", function () {
+        const alerts = document.querySelectorAll(
+            "#messagesContainer .alert"
+        );
 
-            menuToggle.addEventListener("click", function () {
-                if (sidebar.classList.contains("open")) {
-                    closeMenu();
-                } else {
-                    openMenu();
-                }
-            });
+        alerts.forEach(function (alert) {
+            setTimeout(function () {
+                if (!alert.isConnected) return;
 
-            overlay.addEventListener("click", closeMenu);
+                alert.classList.add("message-hide");
 
-            sidebar.querySelectorAll("a").forEach(function (link) {
-                link.addEventListener("click", closeMenu);
-            });
+                setTimeout(function () {
+                    alert.remove();
 
-            sidebar.querySelectorAll("form").forEach(function (form) {
-                form.addEventListener("submit", closeMenu);
-            });
+                    const container = document.getElementById(
+                        "messagesContainer"
+                    );
 
-            document.addEventListener("keydown", function (event) {
-                if (event.key === "Escape") {
-                    closeMenu();
-                }
-            });
+                    if (container && container.children.length === 0) {
+                        container.remove();
+                    }
+                }, 400);
+            }, 5000);
+        });
+    });
+</script>
 
-            window.addEventListener("resize", function () {
-                if (!isMobile()) {
-                    closeMenu();
-                }
-            });
-        })();
-    </script>
 </body>
 </html>

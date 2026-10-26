@@ -1,0 +1,66 @@
+{% extends "documents/base.html" %}
+
+{% block title %}Notifications | MahaServe{% endblock %}
+{% block page_heading %}Notifications{% endblock %}
+
+{% block content %}
+<style>
+    .notifications-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .notification-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 14px;
+    }
+
+    .notification-card h3 {
+        margin: 0 0 8px;
+        color: #1e293b;
+        font-size: 17px;
+    }
+
+    .notification-card p {
+        margin: 0 0 12px;
+        color: #475569;
+        line-height: 1.6;
+    }
+
+    .notification-date {
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .empty-notifications {
+        background: #fff;
+        padding: 30px;
+        border-radius: 12px;
+        text-align: center;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+</style>
+
+<div class="notifications-container">
+    {% for notification in notifications %}
+        <a href="{{ notification.link|default:'#' }}"
+        style="display:block; text-decoration:none; color:inherit;">
+            <div class="notification-card">
+                <h3>{{ notification.title }}</h3>
+                <p>{{ notification.message }}</p>
+                <span class="notification-date">
+                    {{ notification.created_at|date:"M d, Y - h:i A" }}
+                </span>
+            </div>
+        </a>
+    {% empty %}
+        <div class="empty-notifications">
+            <p>You have no notifications yet.</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

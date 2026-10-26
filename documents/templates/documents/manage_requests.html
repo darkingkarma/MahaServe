@@ -6,8 +6,16 @@
 {% block content %}
 
 <style>
+    .requests-page,
+    .requests-page *,
+    .requests-page *::before,
+    .requests-page *::after {
+        box-sizing: border-box;
+    }
+
     .requests-page {
         width: 100%;
+        max-width: 100%;
         min-width: 0;
         color: #172554;
     }
@@ -36,6 +44,9 @@
         gap: 12px;
         align-items: center;
         justify-content: space-between;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
         margin-bottom: 20px;
         padding: 18px;
         background: #fff;
@@ -46,7 +57,7 @@
 
     .filter-form {
         display: flex;
-        flex: 1;
+        flex: 1 1 500px;
         flex-wrap: wrap;
         gap: 10px;
         min-width: 0;
@@ -66,12 +77,13 @@
     }
 
     .search-input {
-        flex: 1;
-        min-width: 180px;
+        flex: 1 1 200px;
+        min-width: 0;
     }
 
     .filter-select {
-        min-width: 155px;
+        flex: 0 1 180px;
+        min-width: 0;
     }
 
     .search-input:focus,
@@ -117,13 +129,25 @@
         background: #f8fafc;
     }
 
+    .filter-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
     .results-count {
+        flex: 0 1 auto;
+        min-width: 0;
         color: #64748b;
         font-size: 13px;
-        white-space: nowrap;
+        overflow-wrap: anywhere;
     }
 
     .table-panel {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
         overflow: hidden;
         background: #fff;
         border: 1px solid #e8edf5;
@@ -136,6 +160,8 @@
         align-items: center;
         justify-content: space-between;
         gap: 12px;
+        width: 100%;
+        min-width: 0;
         padding: 19px 22px;
         border-bottom: 1px solid #edf1f7;
     }
@@ -150,40 +176,55 @@
         margin: 5px 0 0;
         color: #64748b;
         font-size: 12px;
+        line-height: 1.6;
+    }
+
+    /* ===== Desktop table: fits container, no horizontal scroll ===== */
+    .desktop-requests {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
     }
 
     .table-responsive {
+        display: block;
         width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+        max-width: 100%;
+        min-width: 0;
+        overflow: hidden;
     }
 
     .requests-table {
         width: 100%;
-        min-width: 1050px;
-        border-collapse: collapse;
+        min-width: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+        table-layout: fixed;
     }
 
     .requests-table th {
-        padding: 14px 15px;
+        padding: 12px 10px;
         background: #f8fafc;
         color: #64748b;
         font-size: 11px;
         font-weight: 750;
         text-align: left;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        white-space: nowrap;
+        letter-spacing: 0.4px;
+        white-space: normal;
     }
 
     .requests-table td {
-        padding: 16px 15px;
+        padding: 14px 10px;
         border-bottom: 1px solid #edf1f7;
         color: #334155;
         font-size: 13px;
-        line-height: 1.6;
+        line-height: 1.5;
         text-align: left;
         vertical-align: top;
+        word-break: break-word;
+        overflow-wrap: anywhere;
     }
 
     .requests-table tbody tr:last-child td {
@@ -193,6 +234,15 @@
     .requests-table tbody tr:hover {
         background: #fbfdff;
     }
+
+    /* Column widths (total 100%) */
+    .requests-table th:nth-child(1) { width: 14%; } /* Resident */
+    .requests-table th:nth-child(2) { width: 15%; } /* Document + purpose */
+    .requests-table th:nth-child(3) { width: 14%; } /* Payment */
+    .requests-table th:nth-child(4) { width: 11%; } /* Submitted */
+    .requests-table th:nth-child(5) { width: 13%; } /* Status */
+    .requests-table th:nth-child(6) { width: 15%; } /* Remarks */
+    .requests-table th:nth-child(7) { width: 18%; } /* Actions */
 
     .resident-name {
         color: #172554;
@@ -206,7 +256,7 @@
     }
 
     .date-text {
-        white-space: nowrap;
+        white-space: normal;
         color: #64748b;
     }
 
@@ -218,7 +268,8 @@
         border-radius: 20px;
         font-size: 11px;
         font-weight: 750;
-        white-space: nowrap;
+        white-space: normal;
+        text-align: left;
     }
 
     .status::before {
@@ -255,8 +306,41 @@
         color: #7e22ce;
     }
 
+    .status-paid {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-payment-pending {
+        background: #fff7df;
+        color: #a16207;
+    }
+
+    .status-failed {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .status-no-payment {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .payment-amount {
+        color: #172554;
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+    .payment-details {
+        margin-top: 6px;
+        color: #64748b;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
     .remarks {
-        max-width: 190px;
+        max-width: none;
         color: #64748b;
         overflow-wrap: anywhere;
     }
@@ -265,8 +349,9 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        width: 100%;
         min-height: 36px;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         padding: 8px 11px;
         border-radius: 7px;
         background: #eff6ff;
@@ -281,8 +366,40 @@
         background: #dbeafe;
     }
 
+    /* Collapsible update form */
+    .actions-toggle {
+        display: block;
+        width: 100%;
+    }
+
+    .actions-toggle summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 8px 10px;
+        border-radius: 7px;
+        background: #f1f5f9;
+        color: #172554;
+        font-size: 12px;
+        font-weight: 750;
+        text-align: center;
+    }
+
+    .actions-toggle summary:hover {
+        background: #e2e8f0;
+    }
+
+    .actions-toggle summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .actions-toggle[open] summary {
+        margin-bottom: 10px;
+    }
+
     .request-form {
-        width: 205px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
     }
 
     .request-form label {
@@ -297,6 +414,8 @@
     .request-form textarea {
         display: block;
         width: 100%;
+        max-width: 100%;
+        min-width: 0;
         margin-bottom: 12px;
         padding: 10px;
         border: 1px solid #dbe2ed;
@@ -305,7 +424,6 @@
         color: #172554;
         font-family: Arial, sans-serif;
         font-size: 12px;
-        box-sizing: border-box;
         outline: none;
     }
 
@@ -318,6 +436,7 @@
     .save-button {
         display: inline-flex;
         width: 100%;
+        max-width: 100%;
         min-height: 38px;
         align-items: center;
         justify-content: center;
@@ -356,13 +475,19 @@
         font-size: 22px;
     }
 
-    /* Mobile request cards */
+    /* ===== Mobile cards ===== */
     .mobile-requests {
         display: none;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
         padding: 14px;
     }
 
     .request-card {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
         margin-bottom: 14px;
         padding: 16px;
         border: 1px solid #e5eaf2;
@@ -392,17 +517,19 @@
     .request-card .request-id {
         color: #94a3b8;
         font-size: 11px;
+        overflow-wrap: anywhere;
     }
 
     .request-info {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 15px 12px;
         margin-bottom: 16px;
     }
 
     .info-item {
         min-width: 0;
+        overflow-wrap: anywhere;
     }
 
     .info-label {
@@ -427,6 +554,7 @@
         padding: 11px;
         border-radius: 8px;
         background: #f8fafc;
+        overflow-wrap: anywhere;
     }
 
     .mobile-actions {
@@ -441,11 +569,11 @@
         width: 100%;
         min-height: 42px;
         margin: 0;
-        box-sizing: border-box;
     }
 
     .mobile-actions .request-form {
         width: 100%;
+        max-width: 100%;
     }
 
     .mobile-actions .request-form select,
@@ -453,7 +581,18 @@
         font-size: 14px;
     }
 
-    @media (max-width: 850px) {
+    /* Switch to cards on tablets and phones */
+    @media (max-width: 900px) {
+        .desktop-requests {
+            display: none;
+        }
+
+        .mobile-requests {
+            display: block;
+        }
+    }
+
+    @media (max-width: 1000px) {
         .filter-panel {
             align-items: stretch;
         }
@@ -483,26 +622,26 @@
 
         .filter-form {
             flex-direction: column;
+            flex-basis: 100%;
         }
 
         .search-input,
-        .filter-select,
-        .filter-button,
-        .reset-button {
+        .filter-select {
             width: 100%;
             min-width: 0;
+            flex: none;
             min-height: 44px;
-            box-sizing: border-box;
         }
 
-        .filter-form .filter-button,
-        .filter-form .reset-button {
-            flex: 1;
-        }
-
-        .filter-form .filter-actions {
+        .filter-actions {
             display: flex;
-            gap: 8px;
+            width: 100%;
+        }
+
+        .filter-actions .filter-button,
+        .filter-actions .reset-button {
+            flex: 1;
+            min-width: 0;
         }
 
         .table-heading {
@@ -513,14 +652,6 @@
             font-size: 15px;
         }
 
-        .desktop-requests {
-            display: none;
-        }
-
-        .mobile-requests {
-            display: block;
-        }
-
         .request-card {
             padding: 14px;
         }
@@ -528,15 +659,11 @@
         .request-card-top {
             flex-direction: column;
         }
-
-        .request-info {
-            grid-template-columns: 1fr 1fr;
-        }
     }
 
     @media (max-width: 360px) {
         .request-info {
-            grid-template-columns: 1fr;
+            grid-template-columns: minmax(0, 1fr);
         }
     }
 </style>
@@ -546,8 +673,8 @@
     <div class="page-intro">
         <h1>Manage Document Requests</h1>
         <p>
-            Review resident applications, update processing statuses,
-            and provide remarks to keep residents informed.
+            Review resident applications, monitor payments, update
+            processing statuses, and provide remarks to residents.
         </p>
     </div>
 
@@ -569,7 +696,7 @@
                 class="filter-select"
                 aria-label="Filter requests by status"
             >
-                <option value="">All Statuses</option>
+                <option value="">All Request Statuses</option>
 
                 {% for value, label in status_choices %}
                     <option
@@ -594,7 +721,8 @@
         </form>
 
         <div class="results-count">
-            Showing {{ requests_list|length }} request{{ requests_list|length|pluralize }}
+            Showing {{ requests_list|length }}
+            request{{ requests_list|length|pluralize }}
         </div>
     </div>
 
@@ -603,7 +731,10 @@
         <div class="table-heading">
             <div>
                 <h2>Document Requests</h2>
-                <p>View applications and manage their processing status.</p>
+                <p>
+                    View applications, check payment records,
+                    and manage processing statuses.
+                </p>
             </div>
         </div>
 
@@ -615,10 +746,10 @@
                         <tr>
                             <th>Resident</th>
                             <th>Document</th>
-                            <th>Purpose</th>
-                            <th>Date Submitted</th>
+                            <th>Payment</th>
+                            <th>Submitted</th>
                             <th>Status</th>
-                            <th>Staff Remarks</th>
+                            <th>Remarks</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -630,16 +761,45 @@
                                     <div class="resident-name">
                                         {{ item.resident.username }}
                                     </div>
+
+                                    {% if item.resident.first_name or item.resident.last_name %}
+                                        <div class="payment-details">
+                                            {{ item.resident.first_name }}
+                                            {{ item.resident.last_name }}
+                                        </div>
+                                    {% endif %}
                                 </td>
 
                                 <td>
                                     <div class="document-name">
                                         {{ item.document_type.name }}
                                     </div>
+                                    <div class="payment-details">
+                                        {{ item.purpose|truncatewords:8 }}
+                                    </div>
                                 </td>
 
+                                <!-- Latest payment: status + amount + date -->
                                 <td>
-                                    {{ item.purpose|truncatewords:12 }}
+                                    {% if item.payment_records %}
+                                        {% with payment=item.payment_records.0 %}
+                                            <span class="status status-{{ payment.status }}">
+                                                {{ payment.get_status_display }}
+                                            </span>
+
+                                            <div class="payment-amount" style="margin-top: 6px;">
+                                                ₱{{ payment.amount|floatformat:2 }}
+                                            </div>
+
+                                            <div class="payment-details">
+                                                {{ payment.updated_at|date:"M d, Y" }}
+                                            </div>
+                                        {% endwith %}
+                                    {% else %}
+                                        <span class="status status-no-payment">
+                                            No Payment
+                                        </span>
+                                    {% endif %}
                                 </td>
 
                                 <td>
@@ -655,7 +815,7 @@
                                 </td>
 
                                 <td class="remarks">
-                                    {{ item.remarks|default:"No remarks yet." }}
+                                    {{ item.remarks|default:"No remarks yet."|truncatewords:12 }}
                                 </td>
 
                                 <td>
@@ -666,46 +826,50 @@
                                         View Details
                                     </a>
 
-                                    <form
-                                        method="POST"
-                                        action="{% url 'update_request' item.id %}"
-                                        class="request-form"
-                                    >
-                                        {% csrf_token %}
+                                    <details class="actions-toggle">
+                                        <summary>Update</summary>
 
-                                        <label for="status-{{ item.id }}">
-                                            Update Status
-                                        </label>
-
-                                        <select
-                                            id="status-{{ item.id }}"
-                                            name="status"
-                                            required
+                                        <form
+                                            method="POST"
+                                            action="{% url 'update_request' item.id %}"
+                                            class="request-form"
                                         >
-                                            {% for value, label in status_choices %}
-                                                <option
-                                                    value="{{ value }}"
-                                                    {% if item.status == value %}selected{% endif %}
-                                                >
-                                                    {{ label }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
+                                            {% csrf_token %}
 
-                                        <label for="remarks-{{ item.id }}">
-                                            Staff Remarks
-                                        </label>
+                                            <label for="status-{{ item.id }}">
+                                                Status
+                                            </label>
 
-                                        <textarea
-                                            id="remarks-{{ item.id }}"
-                                            name="remarks"
-                                            placeholder="Enter remarks for the resident..."
-                                        >{{ item.remarks|default_if_none:"" }}</textarea>
+                                            <select
+                                                id="status-{{ item.id }}"
+                                                name="status"
+                                                required
+                                            >
+                                                {% for value, label in status_choices %}
+                                                    <option
+                                                        value="{{ value }}"
+                                                        {% if item.status == value %}selected{% endif %}
+                                                    >
+                                                        {{ label }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
 
-                                        <button type="submit" class="save-button">
-                                            Save Changes
-                                        </button>
-                                    </form>
+                                            <label for="remarks-{{ item.id }}">
+                                                Remarks
+                                            </label>
+
+                                            <textarea
+                                                id="remarks-{{ item.id }}"
+                                                name="remarks"
+                                                placeholder="Remarks for the resident..."
+                                            >{{ item.remarks|default_if_none:"" }}</textarea>
+
+                                            <button type="submit" class="save-button">
+                                                Save
+                                            </button>
+                                        </form>
+                                    </details>
                                 </td>
                             </tr>
                         {% empty %}
@@ -741,6 +905,7 @@
                     </div>
 
                     <div class="request-info">
+
                         <div class="info-item">
                             <span class="info-label">Date Submitted</span>
                             <div class="info-value">
@@ -755,12 +920,45 @@
                             </div>
                         </div>
 
+                        <div class="info-item">
+                            <span class="info-label">Payment Status</span>
+                            <div class="info-value">
+                                {% if item.payment_records %}
+                                    {% with payment=item.payment_records.0 %}
+                                        <span class="status status-{{ payment.status }}">
+                                            {{ payment.get_status_display }}
+                                        </span>
+                                    {% endwith %}
+                                {% else %}
+                                    <span class="status status-no-payment">
+                                        No Payment Record
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">Payment Amount</span>
+                            <div class="info-value">
+                                {% if item.payment_records %}
+                                    {% with payment=item.payment_records.0 %}
+                                        <span class="payment-amount">
+                                            ₱{{ payment.amount|floatformat:2 }}
+                                        </span>
+                                    {% endwith %}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </div>
+                        </div>
+
                         <div class="info-item" style="grid-column: 1 / -1;">
                             <span class="info-label">Purpose</span>
                             <div class="info-value">
                                 {{ item.purpose|default:"No purpose provided." }}
                             </div>
                         </div>
+
                     </div>
 
                     <div class="mobile-remarks">
@@ -786,7 +984,7 @@
                             {% csrf_token %}
 
                             <label for="mobile-status-{{ item.id }}">
-                                Update Status
+                                Update Request Status
                             </label>
 
                             <select

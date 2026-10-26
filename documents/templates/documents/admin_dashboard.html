@@ -1,176 +1,782 @@
 {% extends "documents/base.html" %}
 
 {% block title %}Admin Dashboard | MahaServe{% endblock %}
-
 {% block page_heading %}Admin Dashboard{% endblock %}
 
 {% block content %}
 
 <style>
+    .dashboard-page,
+    .dashboard-page * {
+        box-sizing: border-box;
+    }
+
+    .dashboard-page {
+        width: 100%;
+        max-width: 1500px;
+        margin: 0 auto;
+        color: #172554;
+    }
+
     .dashboard-intro {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
         margin-bottom: 25px;
     }
 
     .dashboard-intro h1 {
         margin: 0 0 8px;
         color: #172554;
+        font-size: 28px;
     }
 
     .dashboard-intro p {
         margin: 0;
         color: #64748b;
+        line-height: 1.6;
+    }
+
+    .dashboard-date {
+        color: #64748b;
+        font-size: 13px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 10px 14px;
+    }
+
+    .dashboard-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 25px;
+    }
+
+    .action-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 11px 16px;
+        border-radius: 8px;
+        background: #17365d;
+        color: white;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: bold;
+        transition: background .2s, transform .2s;
+    }
+
+    .action-link:hover {
+        background: #24518a;
+        transform: translateY(-1px);
+    }
+
+    .action-link.secondary {
+        background: white;
+        color: #17365d;
+        border: 1px solid #cbd5e1;
+    }
+
+    .action-link.secondary:hover {
+        background: #f1f5f9;
+    }
+
+    .section-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 30px 0 16px;
+    }
+
+    .section-heading h2 {
+        margin: 0;
+        color: #172554;
+        font-size: 19px;
+    }
+
+    .section-heading p {
+        margin: 5px 0 0;
+        color: #64748b;
+        font-size: 13px;
     }
 
     .stats {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 18px;
-        margin: 26px 0;
+        margin-bottom: 28px;
     }
 
     .stat-card {
+        position: relative;
+        overflow: hidden;
         background: white;
         padding: 22px;
         border-radius: 12px;
-        box-shadow: 0 3px 12px #17233c0b;
         border: 1px solid #e5e7eb;
+        box-shadow: 0 3px 12px rgba(23, 35, 60, .04);
+        min-width: 0;
     }
 
-    .stat-card p {
+    .stat-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .stat-label {
         color: #64748b;
-        margin: 0 0 12px;
-        font-size: 14px;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.5;
     }
 
-    .stat-card h2 {
+    .stat-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+        border-radius: 10px;
+        font-size: 20px;
+    }
+
+    .icon-blue {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .icon-yellow {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .icon-green {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .icon-red {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .icon-purple {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    .icon-gray {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .stat-number {
         margin: 0;
-        font-size: 30px;
+        font-size: 32px;
+        font-weight: 800;
+        line-height: 1.2;
         color: #172554;
+        overflow-wrap: anywhere;
+    }
+
+    .stat-description {
+        margin: 9px 0 0;
+        color: #94a3b8;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+        gap: 20px;
+        align-items: start;
     }
 
     .panel {
+        min-width: 0;
         background: white;
         padding: 22px;
+        border: 1px solid #e5e7eb;
         border-radius: 12px;
-        box-shadow: 0 3px 12px #17233c0b;
-        overflow-x: auto;
+        box-shadow: 0 3px 12px rgba(23, 35, 60, .04);
     }
 
-    .panel h2 {
-        margin-top: 0;
+    .panel-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
         margin-bottom: 20px;
+    }
+
+    .panel-heading h2 {
+        margin: 0;
+        font-size: 18px;
+        color: #172554;
+    }
+
+    .panel-heading p {
+        margin: 5px 0 0;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .view-all {
+        color: #1d4ed8;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .view-all:hover {
+        text-decoration: underline;
+    }
+
+    .table-wrapper {
+        width: 100%;
+        overflow-x: auto;
     }
 
     .requests-table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 550px;
+        min-width: 650px;
     }
 
     .requests-table th,
     .requests-table td {
-        padding: 13px;
+        padding: 14px 12px;
         text-align: left;
-        border-bottom: 1px solid #e8ebf1;
+        vertical-align: middle;
+        border-bottom: 1px solid #edf0f5;
     }
 
     .requests-table th {
+        background: #f8fafc;
         color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+        white-space: nowrap;
+    }
+
+    .requests-table td {
+        color: #475569;
         font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .requests-table tbody tr:hover {
         background: #f8fafc;
     }
 
-    .status {
-        text-transform: capitalize;
+    .requests-table tbody tr:last-child td {
+        border-bottom: none;
     }
 
-    .manage-link {
-        display: inline-block;
-        margin-bottom: 20px;
-        padding: 11px 16px;
-        background: #facc15;
+    .resident-name {
         color: #172554;
-        border-radius: 7px;
-        text-decoration: none;
-        font-weight: bold;
+        font-weight: 700;
     }
 
-    .manage-link:hover {
-        background: #eab308;
+    .document-name {
+        color: #334155;
+        font-weight: 600;
+    }
+
+    .status-badge,
+    .payment-badge {
+        display: inline-block;
+        padding: 6px 9px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-under_review {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-approved {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-rejected {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-released {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .payment-paid {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .payment-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .payment-failed {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .payment-unpaid {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .amount {
+        font-weight: 700;
+        color: #172554;
+        white-space: nowrap;
+    }
+
+    .empty-state {
+        padding: 35px 15px;
+        text-align: center;
+        color: #64748b;
+    }
+
+    .empty-state .empty-icon {
+        font-size: 30px;
+        margin-bottom: 10px;
+    }
+
+    .empty-state h3 {
+        margin: 0 0 7px;
+        color: #334155;
+        font-size: 15px;
+    }
+
+    .empty-state p {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .summary-list {
+        display: flex;
+        flex-direction: column;
+        gap: 19px;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .summary-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    .summary-dot {
+        width: 10px;
+        height: 10px;
+        flex-shrink: 0;
+        border-radius: 50%;
+    }
+
+    .dot-pending { background: #f59e0b; }
+    .dot-review { background: #3b82f6; }
+    .dot-approved { background: #10b981; }
+    .dot-rejected { background: #ef4444; }
+    .dot-released { background: #16a34a; }
+
+    .summary-label {
+        color: #475569;
+        font-size: 13px;
+    }
+
+    .summary-number {
+        color: #172554;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .summary-divider {
+        border: none;
+        border-top: 1px solid #e5e7eb;
+        margin: 21px 0;
+    }
+
+    .quick-info {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 15px;
+        border-radius: 9px;
+        margin-top: 22px;
+    }
+
+    .quick-info h3 {
+        margin: 0 0 7px;
+        font-size: 13px;
+        color: #172554;
+    }
+
+    .quick-info p {
+        margin: 0;
+        font-size: 12px;
+        color: #64748b;
+        line-height: 1.7;
+    }
+
+    @media (max-width: 1100px) {
+        .stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .dashboard-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        .summary-panel {
+            order: -1;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .dashboard-intro h1 {
+            font-size: 23px;
+        }
+
+        .dashboard-intro p {
+            font-size: 13px;
+        }
+
+        .dashboard-date {
+            width: 100%;
+        }
+
+        .dashboard-actions {
+            flex-direction: column;
+        }
+
+        .action-link {
+            width: 100%;
+        }
+
+        .stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 11px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .stat-top {
+            align-items: flex-start;
+            margin-bottom: 13px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+        }
+
+        .stat-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .stat-number {
+            font-size: 25px;
+        }
+
+        .stat-description {
+            font-size: 11px;
+        }
+
+        .panel {
+            padding: 15px;
+        }
+
+        .panel-heading h2 {
+            font-size: 16px;
+        }
+
+        .section-heading h2 {
+            font-size: 17px;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .stats {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
-<div class="dashboard-intro">
-    <h1>Welcome, {{ request.user.username }}!</h1>
-    <p>Overview of barangay document requests and system activity.</p>
+<div class="dashboard-page">
+
+    <div class="dashboard-intro">
+        <div>
+            <h1>Welcome, {{ request.user.username }}!</h1>
+            <p>Monitor barangay document requests, payments, and resident activity.</p>
+        </div>
+    </div>
+
+    <div class="dashboard-actions">
+        <a href="{% url 'manage_documents' %}" class="action-link">
+            <span>＋</span> Manage Document Types
+        </a>
+
+        <a href="{% url 'manage_requests' %}" class="action-link secondary">
+            View All Requests →
+        </a>
+    </div>
+
+    <div class="section-heading">
+        <div>
+            <h2>Dashboard Overview</h2>
+            <p>Summary of document requests and registered accounts.</p>
+        </div>
+    </div>
+
+    <section class="stats">
+
+        <div class="stat-card">
+            <div class="stat-top">
+                <span class="stat-label">Total Requests</span>
+                <span class="stat-icon icon-blue">▤</span>
+            </div>
+            <h2 class="stat-number">{{ total_requests }}</h2>
+            <p class="stat-description">All submitted document requests</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-top">
+                <span class="stat-label">Pending Requests</span>
+                <span class="stat-icon icon-yellow">◷</span>
+            </div>
+            <h2 class="stat-number">{{ pending_requests }}</h2>
+            <p class="stat-description">Waiting for staff review</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-top">
+                <span class="stat-label">Approved Requests</span>
+                <span class="stat-icon icon-green">✓</span>
+            </div>
+            <h2 class="stat-number">{{ approved_requests }}</h2>
+            <p class="stat-description">Approved by barangay staff</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-top">
+                <span class="stat-label">Released Documents</span>
+                <span class="stat-icon icon-purple">▣</span>
+            </div>
+            <h2 class="stat-number">{{ released_requests }}</h2>
+            <p class="stat-description">Ready or marked as released</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-top">
+                <span class="stat-label">Registered Residents</span>
+                <span class="stat-icon icon-blue">♙</span>
+            </div>
+            <h2 class="stat-number">{{ total_residents }}</h2>
+            <p class="stat-description">Citizen accounts registered in the system</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-top">
+                <span class="stat-label">Document Types</span>
+                <span class="stat-icon icon-gray">▧</span>
+            </div>
+            <h2 class="stat-number">{{ total_document_types }}</h2>
+            <p class="stat-description">Available and configured document types</p>
+        </div>
+
+    </section>
+
+    <div class="dashboard-grid">
+
+        <section class="panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Recent Document Requests</h2>
+                    <p>The latest five submitted requests.</p>
+                </div>
+
+                <a href="{% url 'manage_requests' %}" class="view-all">
+                    View All →
+                </a>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="requests-table">
+                    <thead>
+                        <tr>
+                            <th>Resident</th>
+                            <th>Document</th>
+                            <th>Request Status</th>
+                            <th>Payment</th>
+                            <th>Submitted</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for item in recent_requests %}
+                            <tr>
+                                <td>
+                                    <span class="resident-name">
+                                        {{ item.resident.username }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="document-name">
+                                        {{ item.document_type.name }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="status-badge status-{{ item.status }}">
+                                        {{ item.get_status_display }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {% if item.document_type.fee <= 0 %}
+                                        <span class="payment-badge payment-unpaid">Free</span>
+                                    {% else %}
+                                        {% with payment=item.payments.last %}
+                                            {% if payment and payment.status == "paid" %}
+                                                <span class="payment-badge payment-paid">Paid</span>
+                                            {% elif payment and payment.status == "pending" %}
+                                                <span class="payment-badge payment-pending">Pending</span>
+                                            {% elif payment and payment.status == "failed" %}
+                                                <span class="payment-badge payment-failed">Failed</span>
+                                            {% else %}
+                                                <span class="payment-badge payment-unpaid">Unpaid</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% endif %}
+                                </td>
+
+                                <td>{{ item.submitted_at|date:"M d, Y" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5">
+                                    <div class="empty-state">
+                                        <div class="empty-icon">▤</div>
+                                        <h3>No requests yet</h3>
+                                        <p>New resident document requests will appear here.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel summary-panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Request Status Summary</h2>
+                    <p>Current request counts by status.</p>
+                </div>
+            </div>
+
+            <div class="summary-list">
+                <div class="summary-item">
+                    <div class="summary-left">
+                        <span class="summary-dot dot-pending"></span>
+                        <span class="summary-label">Pending</span>
+                    </div>
+                    <span class="summary-number">{{ pending_requests }}</span>
+                </div>
+
+                <div class="summary-item">
+                    <div class="summary-left">
+                        <span class="summary-dot dot-review"></span>
+                        <span class="summary-label">Under Review</span>
+                    </div>
+                    <span class="summary-number">{{ under_review_requests }}</span>
+                </div>
+
+                <div class="summary-item">
+                    <div class="summary-left">
+                        <span class="summary-dot dot-approved"></span>
+                        <span class="summary-label">Approved</span>
+                    </div>
+                    <span class="summary-number">{{ approved_requests }}</span>
+                </div>
+
+                <div class="summary-item">
+                    <div class="summary-left">
+                        <span class="summary-dot dot-rejected"></span>
+                        <span class="summary-label">Rejected</span>
+                    </div>
+                    <span class="summary-number">{{ rejected_requests }}</span>
+                </div>
+
+                <div class="summary-item">
+                    <div class="summary-left">
+                        <span class="summary-dot dot-released"></span>
+                        <span class="summary-label">Released</span>
+                    </div>
+                    <span class="summary-number">{{ released_requests }}</span>
+                </div>
+            </div>
+
+            <hr class="summary-divider">
+
+            <div class="summary-item">
+                <div class="summary-left">
+                    <span class="summary-label"><strong>Total Requests</strong></span>
+                </div>
+                <span class="summary-number">{{ total_requests }}</span>
+            </div>
+
+            <div class="quick-info">
+                <h3>Staff Reminder</h3>
+                <p>Review pending requests regularly, check payment confirmations, and update request statuses so residents can track their documents.</p>
+            </div>
+        </section>
+
+    </div>
+
 </div>
-
-<a href="{% url 'manage_documents' %}" class="manage-link">
-    + Manage Document Types
-</a>
-
-<section class="stats">
-
-    <div class="stat-card">
-        <p>Total Requests</p>
-        <h2>{{ total_requests }}</h2>
-    </div>
-
-    <div class="stat-card">
-        <p>Pending Requests</p>
-        <h2>{{ pending_requests }}</h2>
-    </div>
-
-    <div class="stat-card">
-        <p>Approved Requests</p>
-        <h2>{{ approved_requests }}</h2>
-    </div>
-
-    <div class="stat-card">
-        <p>Released Documents</p>
-        <h2>{{ released_requests }}</h2>
-    </div>
-
-    <div class="stat-card">
-        <p>Residents with Requests</p>
-        <h2>{{ total_residents }}</h2>
-    </div>
-
-    <div class="stat-card">
-        <p>Document Types</p>
-        <h2>{{ total_document_types }}</h2>
-    </div>
-
-</section>
-
-<section class="panel">
-    <h2>Recent Requests</h2>
-
-    <table class="requests-table">
-        <thead>
-            <tr>
-                <th>Resident</th>
-                <th>Document</th>
-                <th>Status</th>
-                <th>Submitted</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {% for item in recent_requests %}
-                <tr>
-                    <td>{{ item.resident.username }}</td>
-                    <td>{{ item.document_type.name }}</td>
-                    <td class="status">{{ item.get_status_display }}</td>
-                    <td>{{ item.submitted_at|date:"M d, Y" }}</td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="4">No document requests yet.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</section>
 
 {% endblock %}

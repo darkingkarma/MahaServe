@@ -1,145 +1,192 @@
+{% extends "documents/resident_base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Request Document - MahaServe</title>
+{% block title %}Request Document | MahaServe{% endblock %}
 
-    <style>
-        * {
-            box-sizing: border-box;
+{% block content %}
+<style>
+    .request-page,
+    .request-page * {
+        box-sizing: border-box;
+    }
+
+    .request-page {
+        max-width: 750px;
+        margin: 35px auto;
+        padding: 0 20px 35px;
+        color: #263445;
+    }
+
+    .request-card {
+        background: #ffffff;
+        padding: 28px;
+        border-radius: 14px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e5eaf0;
+    }
+
+    .request-card h1 {
+        color: #17365d;
+        margin: 0 0 10px;
+        font-size: 28px;
+    }
+
+    .request-intro {
+        color: #64748b;
+        margin-bottom: 24px;
+        line-height: 1.6;
+    }
+
+    .document-image {
+        display: block;
+        width: 100%;
+        max-height: 260px;
+        object-fit: contain;
+        background: #f4f7fb;
+        border-radius: 10px;
+        margin-bottom: 22px;
+    }
+
+    .document-name {
+        color: #17365d;
+        margin: 0 0 12px;
+        font-size: 22px;
+    }
+
+    .document-description {
+        color: #475569;
+        line-height: 1.7;
+        white-space: pre-line;
+    }
+
+    .document-fee {
+        display: inline-block;
+        background: #eff6ff;
+        color: #17365d;
+        font-weight: bold;
+        padding: 10px 14px;
+        border-radius: 8px;
+        margin: 8px 0 22px;
+    }
+
+    .request-page label {
+        display: block;
+        margin-bottom: 9px;
+        font-weight: 600;
+        color: #263445;
+    }
+
+    .request-page textarea {
+        display: block;
+        width: 100%;
+        min-height: 140px;
+        padding: 13px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font: inherit;
+        resize: vertical;
+        outline: none;
+    }
+
+    .request-page textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .form-help {
+        color: #64748b;
+        font-size: 13px;
+        margin: 8px 0 20px;
+    }
+
+    .request-messages {
+        margin-bottom: 18px;
+    }
+
+    .request-message {
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        background: #fff3cd;
+        color: #664d03;
+    }
+
+    .request-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 22px;
+    }
+
+    .request-button {
+        display: inline-block;
+        padding: 12px 18px;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .submit-button {
+        background: #17365d;
+        color: #ffffff;
+    }
+
+    .submit-button:hover {
+        background: #234b7b;
+    }
+
+    .cancel-button {
+        background: #e5e7eb;
+        color: #263445;
+    }
+
+    .cancel-button:hover {
+        background: #d1d5db;
+    }
+
+    @media (max-width: 600px) {
+        .request-page {
+            margin-top: 20px;
+            padding: 0 12px 25px;
         }
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f7fb;
-            color: #263445;
+        .request-card {
+            padding: 20px;
         }
 
-        header {
-            background: #17365d;
-            color: white;
-            padding: 20px 6%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .request-card h1 {
+            font-size: 24px;
         }
 
-        header h2 {
-            margin: 0;
+        .request-actions {
+            flex-direction: column;
         }
 
-        header a {
-            color: white;
-            text-decoration: none;
-        }
-
-        .container {
-            max-width: 650px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        .card {
-            background: white;
-            padding: 28px;
-            border-radius: 10px;
-            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        h1, h2 {
-            color: #17365d;
-        }
-
-        .document-image {
+        .request-button {
             width: 100%;
-            max-height: 240px;
-            object-fit: contain;
-            background: #f4f7fb;
-            border-radius: 8px;
         }
+    }
+</style>
 
-        .fee {
-            color: #17365d;
-            font-weight: bold;
-        }
-
-        label {
-            display: block;
-            margin: 20px 0 8px;
-            font-weight: bold;
-        }
-
-        textarea {
-            width: 100%;
-            min-height: 130px;
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-family: Arial, sans-serif;
-            font-size: 15px;
-            resize: vertical;
-        }
-
-        .button {
-            display: inline-block;
-            padding: 12px 18px;
-            border: none;
-            border-radius: 6px;
-            text-decoration: none;
-            cursor: pointer;
-            font-size: 15px;
-        }
-
-        .submit-button {
-            background: #17365d;
-            color: white;
-        }
-
-        .back-button {
-            background: #e5e7eb;
-            color: #263445;
-            margin-left: 8px;
-        }
-
-        .messages {
-            padding: 12px;
-            margin-bottom: 16px;
-            border-radius: 6px;
-            background: #fff3cd;
-            color: #664d03;
-        }
-
-        @media (max-width: 600px) {
-            .card {
-                padding: 20px;
-            }
-
-            .back-button {
-                margin: 10px 0 0;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-<header>
-    <h2>MahaServe</h2>
-    <a href="{% url 'resident_dashboard' %}">Back to Dashboard</a>
-</header>
-
-<main class="container">
-    <div class="card">
+<main class="request-page">
+    <section class="request-card">
         <h1>Request a Document</h1>
-        <p>Review the document details and provide your purpose.</p>
+
+        <p class="request-intro">
+            Review the document details and provide the purpose of your request.
+        </p>
 
         {% if messages %}
-            {% for message in messages %}
-                <div class="messages">{{ message }}</div>
-            {% endfor %}
+            <div class="request-messages">
+                {% for message in messages %}
+                    <div class="request-message">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
         {% endif %}
 
         {% if document.image %}
@@ -150,20 +197,21 @@
             >
         {% endif %}
 
-        <h2>{{ document.name }}</h2>
+        <h2 class="document-name">{{ document.name }}</h2>
 
-        <p>
+        <p class="document-description">
             {{ document.description|default:"Barangay document service." }}
         </p>
 
-        <p class="fee">
+        <div class="document-fee">
             Fee: ₱{{ document.fee|floatformat:2 }}
-        </p>
+        </div>
 
         <form method="POST">
             {% csrf_token %}
 
             <label for="purpose">Purpose of Request</label>
+
             <textarea
                 id="purpose"
                 name="purpose"
@@ -171,19 +219,26 @@
                 required
             ></textarea>
 
-            <button type="submit" class="button submit-button">
-                Submit Request
-            </button>
+            <p class="form-help">
+                Please provide an accurate explanation of why you need this document.
+            </p>
 
-            <a
-                href="{% url 'resident_dashboard' %}"
-                class="button back-button"
-            >
-                Cancel
-            </a>
+            <div class="request-actions">
+                <button
+                    type="submit"
+                    class="request-button submit-button"
+                >
+                    Submit Request
+                </button>
+
+                <a
+                    href="{% url 'resident_dashboard' %}"
+                    class="request-button cancel-button"
+                >
+                    Cancel
+                </a>
+            </div>
         </form>
-    </div>
+    </section>
 </main>
-
-</body>
-</html>
+{% endblock %}

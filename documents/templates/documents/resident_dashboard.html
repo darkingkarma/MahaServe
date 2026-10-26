@@ -9,78 +9,147 @@
     }
 
     .welcome h1 {
-        margin-bottom: 8px;
+        margin: 0 0 8px;
         color: #17365d;
+        font-size: clamp(24px, 4vw, 32px);
+        overflow-wrap: anywhere;
+    }
+
+    .welcome p {
+        margin: 0;
+        color: #5b6573;
+        line-height: 1.6;
     }
 
     .document-section {
-        background: white;
+        background: #fff;
         padding: 24px;
-        border-radius: 10px;
+        border-radius: 12px;
         box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
     }
 
     .document-section h2 {
-        margin-top: 0;
+        margin: 0 0 8px;
         color: #17365d;
+        font-size: 22px;
     }
 
     .document-section > p {
         color: #5b6573;
-        margin-bottom: 20px;
+        margin: 0 0 22px;
+        line-height: 1.6;
     }
 
+    /* Fixed card widths: one card won't stretch across the page */
     .document-list {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: stretch;
         gap: 20px;
+        justify-content: start;
     }
 
     .document-card {
+        width: 100%;
+        max-width: 360px;
+        min-width: 0;
+        height: 100%;
+        box-sizing: border-box;
         border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 18px;
+        border-radius: 10px;
+        overflow: hidden;
         display: flex;
         flex-direction: column;
-        align-items: flex-start;
+        background: #fff;
+        transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    .document-card:hover {
+        box-shadow: 0 5px 18px rgba(23, 54, 93, 0.10);
+        transform: translateY(-2px);
+    }
+
+    /* Clickable document image */
+    .image-button {
+        display: block;
+        width: 100%;
+        padding: 0;
+        border: none;
+        background: #f4f7fb;
+        cursor: zoom-in;
+        overflow: hidden;
+    }
+
+    .document-image {
+        display: block;
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        transition: transform 0.25s;
+    }
+
+    .image-button:hover .document-image {
+        transform: scale(1.04);
+    }
+
+    .image-placeholder {
+        width: 100%;
+        height: 180px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f4f7fb;
+        color: #7b8794;
+        font-size: 14px;
+    }
+
+    .document-card-body {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 0;
+        padding: 18px;
     }
 
     .document-card h3 {
         margin: 0 0 10px;
         color: #17365d;
+        font-size: 18px;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
     }
 
-    .document-image {
-        width: 100%;
-        height: 160px;
-        object-fit: cover;
-        border-radius: 6px;
-        margin-bottom: 15px;
-        background: #f4f7fb;
-    }
-
+    /* Long descriptions expand naturally */
     .document-description {
-        line-height: 1.6;
+        margin: 0 0 16px;
+        line-height: 1.7;
         color: #5b6573;
+        font-size: 14px;
+        overflow-wrap: anywhere;
+        white-space: normal;
         flex-grow: 1;
     }
 
     .fee {
         font-weight: bold;
         color: #17365d;
-        margin-top: 8px;
+        margin: 0 0 10px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
     }
 
     .request-button {
-        display: inline-block;
+        display: block;
         width: 100%;
+        box-sizing: border-box;
         background: #17365d;
-        color: white;
-        padding: 11px 16px;
+        color: #fff;
+        padding: 12px 16px;
+        border: none;
         border-radius: 6px;
         text-decoration: none;
         text-align: center;
-        margin-top: 10px;
+        margin-top: auto;
         font-size: 14px;
         font-weight: bold;
         transition: background 0.2s;
@@ -93,11 +162,124 @@
     .empty {
         color: #6b7280;
         padding: 15px 0;
+        line-height: 1.6;
     }
 
+    /* Tablet: two columns */
+    @media (max-width: 900px) {
+        .document-list {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    /* Mobile: one column with a reasonable card width */
     @media (max-width: 600px) {
         .document-section {
-            padding: 18px;
+            padding: 16px;
+        }
+
+        .document-section h2 {
+            font-size: 20px;
+        }
+
+        .document-list {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 16px;
+        }
+
+        .document-card {
+            max-width: 360px;
+        }
+
+        .document-image,
+        .image-placeholder {
+            height: 200px;
+        }
+
+        .document-card-body {
+            padding: 16px;
+        }
+
+        .image-modal {
+            padding: 14px;
+        }
+
+        .modal-close {
+            top: -12px;
+            right: -4px;
+        }
+    }
+
+    /* Image preview modal */
+    .image-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.82);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .image-modal.show {
+        display: flex;
+    }
+
+    .modal-content {
+        position: relative;
+        width: min(900px, 100%);
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .modal-image {
+        display: block;
+        max-width: 100%;
+        max-height: 78vh;
+        object-fit: contain;
+        border-radius: 8px;
+        background: #fff;
+    }
+
+    .modal-caption {
+        color: #fff;
+        text-align: center;
+        margin-top: 12px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: -16px;
+        right: -12px;
+        width: 40px;
+        height: 40px;
+        border: none;
+        border-radius: 50%;
+        background: #fff;
+        color: #17365d;
+        font-size: 28px;
+        line-height: 1;
+        cursor: pointer;
+        z-index: 2;
+    }
+
+    .modal-close:hover {
+        background: #e5e7eb;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .document-card,
+        .document-image {
+            transition: none;
+        }
+
+        .document-card:hover {
+            transform: none;
         }
     }
 </style>
@@ -116,38 +298,50 @@
 
     {% if document_types %}
         <div class="document-list">
-
             {% for document in document_types %}
-                <div class="document-card">
+                <article class="document-card">
 
                     {% if document.image %}
-                        <img
-                            src="{{ document.image.url }}"
-                            alt="{{ document.name }}"
-                            class="document-image"
+                        <button
+                            type="button"
+                            class="image-button"
+                            data-image="{{ document.image.url }}"
+                            data-title="{{ document.name }}"
+                            aria-label="Preview image of {{ document.name }}"
                         >
+                            <img
+                                src="{{ document.image.url }}"
+                                alt="{{ document.name }}"
+                                class="document-image"
+                                loading="lazy"
+                            >
+                        </button>
+                    {% else %}
+                        <div class="image-placeholder">
+                            No image available
+                        </div>
                     {% endif %}
 
-                    <h3>{{ document.name }}</h3>
+                    <div class="document-card-body">
+                        <h3>{{ document.name }}</h3>
 
-                    <p class="document-description">
-                        {{ document.description|default:"Barangay document service." }}
-                    </p>
+                        <p class="document-description">
+                            {{ document.description|default:"Barangay document service." }}
+                        </p>
 
-                    <p class="fee">
-                        Fee: ₱{{ document.fee|floatformat:2 }}
-                    </p>
+                        <p class="fee">
+                            Fee: ₱{{ document.fee|floatformat:2 }}
+                        </p>
 
-                    <a
-                        href="{% url 'request_document' document.id %}"
-                        class="request-button"
-                    >
-                        Request Document
-                    </a>
-
-                </div>
+                        <a
+                            href="{% url 'request_document' document.id %}"
+                            class="request-button"
+                        >
+                            Request Document
+                        </a>
+                    </div>
+                </article>
             {% endfor %}
-
         </div>
     {% else %}
         <p class="empty">
@@ -155,5 +349,97 @@
         </p>
     {% endif %}
 </section>
+
+<!-- Image Preview Modal -->
+<div
+    class="image-modal"
+    id="imageModal"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Document image preview"
+    aria-hidden="true"
+>
+    <div class="modal-content">
+        <button
+            type="button"
+            class="modal-close"
+            id="modalClose"
+            aria-label="Close image preview"
+        >&times;</button>
+
+        <img
+            src=""
+            alt=""
+            class="modal-image"
+            id="modalImage"
+        >
+
+        <p class="modal-caption" id="modalCaption"></p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const modal = document.getElementById("imageModal");
+        const modalImage = document.getElementById("modalImage");
+        const modalCaption = document.getElementById("modalCaption");
+        const closeButton = document.getElementById("modalClose");
+        const imageButtons = document.querySelectorAll(".image-button");
+
+        let previousFocus = null;
+
+        function openModal(imageUrl, title, trigger) {
+            previousFocus = trigger;
+
+            modalImage.src = imageUrl;
+            modalImage.alt = title;
+            modalCaption.textContent = title;
+
+            modal.classList.add("show");
+            modal.setAttribute("aria-hidden", "false");
+            document.body.style.overflow = "hidden";
+
+            closeButton.focus();
+        }
+
+        function closeModal() {
+            modal.classList.remove("show");
+            modal.setAttribute("aria-hidden", "true");
+            modalImage.src = "";
+            document.body.style.overflow = "";
+
+            if (previousFocus) {
+                previousFocus.focus();
+            }
+        }
+
+        imageButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                openModal(
+                    button.dataset.image,
+                    button.dataset.title,
+                    button
+                );
+            });
+        });
+
+        closeButton.addEventListener("click", closeModal);
+
+        modal.addEventListener("click", function (event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (
+                event.key === "Escape" &&
+                modal.classList.contains("show")
+            ) {
+                closeModal();
+            }
+        });
+    });
+</script>
 
 {% endblock %}

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,23 +14,25 @@
         body {
             margin: 0;
             font-family: Arial, sans-serif;
-            background: #f4f6fb;
-            color: #17233c;
+            background: #f7f8fa;
+            color: #263445;
         }
 
-        /* Sticky navigation */
+        a {
+            text-decoration: none;
+        }
+
         .navbar {
             position: sticky;
             top: 0;
             z-index: 1000;
-            background: #14284b;
+            background: #17365d;
             color: white;
-            box-shadow: 0 3px 12px #14284b20;
         }
 
         .nav-container {
             max-width: 1200px;
-            min-height: 70px;
+            min-height: 68px;
             margin: auto;
             padding: 12px 24px;
             display: flex;
@@ -40,29 +41,41 @@
             gap: 20px;
         }
 
+        .nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
         .brand {
             color: white;
             font-size: 23px;
             font-weight: bold;
-            text-decoration: none;
             white-space: nowrap;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .nav-links {
             display: flex;
             align-items: center;
-            justify-content: flex-end;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 5px;
         }
 
         .nav-links a {
+            display: inline-block;
+            padding: 9px 11px;
+            border-radius: 5px;
             color: #e8eef9;
-            text-decoration: none;
-            padding: 10px 12px;
-            border-radius: 7px;
             font-size: 14px;
-            transition: background 0.2s;
         }
 
         .nav-links a:hover,
@@ -71,7 +84,6 @@
             color: white;
         }
 
-        /* AI Assistant navigation link */
         .nav-links a.ai-link {
             background: #2563eb;
             color: white;
@@ -81,42 +93,129 @@
             background: #1d4ed8;
         }
 
+        /* NOTIFICATION BELL */
+        .notification-link {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            flex-shrink: 0;
+            border: 1px solid #ffffff60;
+            border-radius: 8px;
+            color: white;
+            font-size: 23px;
+            transition: background 0.2s;
+        }
+
+        .notification-link:hover {
+            background: #294873;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            min-width: 19px;
+            height: 19px;
+            padding: 2px 5px;
+            border: 2px solid #17365d;
+            border-radius: 20px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            line-height: 13px;
+            text-align: center;
+        }
+
+        .nav-search {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-search input {
+            width: 190px;
+            min-width: 0;
+            padding: 10px 12px;
+            border: 1px solid #d5deea;
+            border-radius: 5px;
+            outline: none;
+            background: white;
+            color: #263445;
+            font-size: 14px;
+        }
+
+        .nav-search input:focus {
+            border-color: #f6c453;
+            box-shadow: 0 0 0 2px #f6c45335;
+        }
+
+        .search-button {
+            padding: 10px 12px;
+            border: none;
+            border-radius: 5px;
+            background: #f6c453;
+            color: #17365d;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .search-button:hover {
+            background: #ffda75;
+        }
+
         .logout-form {
             margin: 0;
         }
 
         .logout-button {
-            border: 1px solid #ffffff70;
-            border-radius: 7px;
+            padding: 9px 12px;
+            border: 1px solid #ffffff80;
+            border-radius: 5px;
             background: transparent;
             color: white;
-            padding: 10px 12px;
-            cursor: pointer;
             font-size: 14px;
+            cursor: pointer;
         }
 
         .logout-button:hover {
             background: #294873;
         }
 
-        /* Main content */
-        .page-container {
-            width: 92%;
-            max-width: 1200px;
-            min-height: calc(100vh - 145px);
-            margin: 30px auto;
+        .menu-toggle {
+            display: none;
+            padding: 8px 11px;
+            border: 1px solid #ffffff70;
+            border-radius: 5px;
+            background: transparent;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
         }
 
-        /* Django messages */
+        .page-container {
+            width: 100%;
+            max-width: 1200px;
+            min-height: calc(100vh - 145px);
+            margin: 28px auto;
+            padding: 0 24px;
+        }
+
         .messages-container {
-            margin-bottom: 22px;
+            margin-bottom: 20px;
         }
 
         .alert {
-            padding: 14px 16px;
-            margin-bottom: 12px;
-            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 10px;
+            padding: 12px 15px 18px;
             border: 1px solid transparent;
+            border-radius: 6px;
             font-size: 14px;
             line-height: 1.5;
         }
@@ -145,34 +244,162 @@
             border-color: #c4daf8;
         }
 
-        /* Shared footer */
-        .footer {
-            text-align: center;
-            padding: 22px 16px;
-            color: #64718a;
-            font-size: 13px;
-            border-top: 1px solid #e3e8f1;
-            background: white;
+        .alert-progress {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 3px;
+            background: currentColor;
+            opacity: 0.35;
+            transform-origin: left;
+            animation: messageCountdown 5s linear forwards;
         }
 
-        @media (max-width: 700px) {
+        @keyframes messageCountdown {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
+
+        .alert.message-hide {
+            animation: messageFadeOut 0.4s ease forwards;
+        }
+
+        @keyframes messageFadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+                max-height: 200px;
+                margin-bottom: 10px;
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-5px);
+                max-height: 0;
+                margin-bottom: 0;
+                padding-top: 0;
+                padding-bottom: 0;
+                border-width: 0;
+            }
+        }
+
+        .footer {
+            padding: 22px 16px;
+            border-top: 1px solid #e1e6ed;
+            background: white;
+            color: #64718a;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
             .nav-container {
-                align-items: flex-start;
-                flex-direction: column;
+                flex-wrap: wrap;
                 gap: 12px;
             }
 
-            .nav-links {
+            .nav-right {
+                flex: 1 1 100%;
                 justify-content: flex-start;
+            }
+
+            .nav-search {
+                flex: 1 1 100%;
+                order: -1;
+            }
+
+            .nav-search input {
+                flex: 1;
+                width: auto;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .nav-container {
+                padding: 12px 16px;
+                gap: 12px;
+            }
+
+            .nav-header {
                 width: 100%;
             }
 
+            .brand {
+                font-size: 22px;
+            }
+
+            .menu-toggle {
+                display: inline-block;
+            }
+
+            .nav-right {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .nav-right.open {
+                display: flex;
+            }
+
+            .nav-search {
+                width: 100%;
+                order: 0;
+            }
+
+            .nav-search input {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .search-button {
+                flex-shrink: 0;
+            }
+
+            .nav-links {
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 3px;
+            }
+
             .nav-links a {
-                padding: 9px;
+                display: block;
+                padding: 11px 10px;
+            }
+
+            .notification-link {
+                align-self: flex-start;
+                margin: 3px 0;
+            }
+
+            .logout-form,
+            .logout-button {
+                width: 100%;
+            }
+
+            .logout-button {
+                padding: 11px;
             }
 
             .page-container {
+                width: 100%;
                 margin: 20px auto;
+                padding: 0 16px;
+            }
+
+            .footer {
+                padding: 18px 14px;
+                line-height: 1.6;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .alert-progress,
+            .alert.message-hide {
+                animation: none;
             }
         }
     </style>
@@ -181,15 +408,67 @@
 </head>
 
 <body>
-    <header class="navbar">
-        <div class="nav-container">
 
+<header class="navbar">
+    <div class="nav-container">
+
+        <div class="nav-header">
             <a class="brand" href="{% url 'resident_dashboard' %}">
                 MahaServe
             </a>
 
-            <nav class="nav-links">
+            <button
+                type="button"
+                class="menu-toggle"
+                id="menuToggle"
+                aria-label="Toggle navigation"
+                aria-expanded="false"
+                aria-controls="navRight"
+            >☰</button>
+        </div>
 
+        <div class="nav-right" id="navRight">
+
+            <form
+                class="nav-search"
+                method="get"
+                action="{% url 'search_documents' %}"
+                role="search"
+            >
+                <input
+                    type="search"
+                    name="q"
+                    placeholder="Search documents..."
+                    aria-label="Search documents"
+                    value="{{ request.GET.q|default:'' }}"
+                >
+
+                <button class="search-button" type="submit">
+                    Search
+                </button>
+            </form>
+
+            <!-- NOTIFICATIONS -->
+            <a
+                href="{% url 'notification_list' %}"
+                class="notification-link"
+                aria-label="Notifications{% if unread_notification_count %}, {{ unread_notification_count }} unread{% endif %}"
+                title="Notifications"
+            >
+                <span aria-hidden="true">♧</span>
+
+                {% if unread_notification_count %}
+                    <span class="notification-badge">
+                        {% if unread_notification_count > 99 %}
+                            99+
+                        {% else %}
+                            {{ unread_notification_count }}
+                        {% endif %}
+                    </span>
+                {% endif %}
+            </a>
+
+            <nav class="nav-links" aria-label="Main navigation">
                 <a href="{% url 'resident_dashboard' %}">
                     Dashboard
                 </a>
@@ -203,51 +482,89 @@
                 </a>
 
                 <a href="{% url 'ai_assistant' %}" class="ai-link">
-                    🤖 AI Assistant
+                    AI Assistant
                 </a>
-
-                <form
-                    class="logout-form"
-                    method="post"
-                    action="{% url 'logout' %}"
-                >
-                    {% csrf_token %}
-
-                    <button class="logout-button" type="submit">
-                        Logout
-                    </button>
-                </form>
-
             </nav>
+
+            <form
+                class="logout-form"
+                method="post"
+                action="{% url 'logout' %}"
+            >
+                {% csrf_token %}
+                <button class="logout-button" type="submit">
+                    Logout
+                </button>
+            </form>
+
         </div>
-    </header>
+    </div>
+</header>
 
-    <main class="page-container">
+<main class="page-container">
 
-        {% if messages %}
-            <div class="messages-container" aria-live="polite">
+    {% if messages %}
+        <div
+            class="messages-container"
+            aria-live="polite"
+            id="messagesContainer"
+        >
+            {% for message in messages %}
+                <div class="alert {{ message.tags|default:'info' }}">
+                    {{ message }}
+                    <div class="alert-progress" aria-hidden="true"></div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
-                {% for message in messages %}
+    {% block content %}
+    {% endblock %}
 
-                    <div class="alert {{ message.tags|default:'info' }}">
-                        {{ message }}
-                    </div>
+</main>
 
-                {% endfor %}
+<footer class="footer">
+    &copy; {% now "Y" %} MahaServe |
+    Barangay Mahayahay Document Request and Processing System
+</footer>
 
-            </div>
-        {% endif %}
+<script>
+    /* MOBILE NAVIGATION */
+    const menuToggle = document.getElementById("menuToggle");
+    const navRight = document.getElementById("navRight");
 
-        {% block content %}
-        {% endblock %}
+    if (menuToggle && navRight) {
+        menuToggle.addEventListener("click", function () {
+            const isOpen = navRight.classList.toggle("open");
 
-    </main>
+            menuToggle.setAttribute(
+                "aria-expanded",
+                String(isOpen)
+            );
 
-    <footer class="footer">
-        &copy; {% now "Y" %} MahaServe |
-        Barangay Mahayahay Document Request and Processing System
-    </footer>
+            menuToggle.textContent = isOpen ? "✕" : "☰";
+        });
+    }
+
+    /* AUTO-DISMISS DJANGO MESSAGES */
+    document.addEventListener("DOMContentLoaded", function () {
+        const alerts = document.querySelectorAll(
+            ".messages-container .alert"
+        );
+
+        alerts.forEach(function (alert) {
+            setTimeout(function () {
+                alert.classList.add("message-hide");
+
+                setTimeout(function () {
+                    alert.remove();
+                }, 400);
+            }, 5000);
+        });
+    });
+</script>
+
+{% block extra_js %}{% endblock %}
 
 </body>
 </html>
-    

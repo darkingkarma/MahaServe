@@ -1,0 +1,87 @@
+{% extends "documents/resident_base.html" %}
+
+{% block title %}Notifications | MahaServe{% endblock %}
+
+{% block content %}
+<style>
+    .notifications-page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 24px 16px;
+    }
+
+    .notifications-page h1 {
+        margin-bottom: 8px;
+        color: #243447;
+    }
+
+    .notifications-intro {
+        color: #64748b;
+        margin-bottom: 24px;
+    }
+
+    .notification-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 18px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    .notification-card.unread {
+        border-left: 5px solid #2563eb;
+        background: #f8fbff;
+    }
+
+    .notification-card h3 {
+        margin: 0 0 8px;
+        color: #1e293b;
+        font-size: 16px;
+    }
+
+    .notification-card p {
+        margin: 0 0 10px;
+        color: #475569;
+        line-height: 1.6;
+    }
+
+    .notification-date {
+        color: #94a3b8;
+        font-size: 12px;
+    }
+
+    .empty-notifications {
+        background: white;
+        padding: 35px 20px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        color: #64748b;
+    }
+</style>
+
+<div class="notifications-page">
+    <h1>Notifications</h1>
+    <p class="notifications-intro">
+        View updates about your document requests.
+    </p>
+
+    {% for notification in notifications %}
+        <a href="{{ notification.link|default:'/resident/requests/' }}"
+        style="display:block; text-decoration:none; color:inherit;">
+            <div class="notification-card {% if not notification.is_read %}unread{% endif %}">
+                <h3>{{ notification.title }}</h3>
+                <p>{{ notification.message }}</p>
+                <span class="notification-date">
+                    {{ notification.created_at|date:"M d, Y - h:i A" }}
+                </span>
+            </div>
+        </a>
+    {% empty %}
+        <div class="empty-notifications">
+            <p>You have no notifications yet.</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

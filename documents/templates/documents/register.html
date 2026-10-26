@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,7 +97,39 @@
             gap: 14px;
         }
 
-        button {
+        /* Password show/hide */
+        .password-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .password-wrapper input {
+            padding-right: 65px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            width: auto;
+            margin: 0;
+            padding: 5px 2px;
+            border: none;
+            background: transparent;
+            color: #17365d;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .password-toggle:hover {
+            background: transparent;
+            color: #102946;
+            text-decoration: underline;
+        }
+
+        button[type="submit"] {
             width: 100%;
             margin-top: 26px;
             padding: 13px;
@@ -107,20 +140,67 @@
             font-size: 15px;
             font-weight: bold;
             cursor: pointer;
+            transition: background 0.2s;
         }
 
-        button:hover {
+        button[type="submit"]:hover {
             background: #102946;
         }
 
-        .messages {
+        /* Messages */
+        .messages-container {
             margin: 12px 0;
-            padding: 11px;
+        }
+
+        .messages {
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 10px;
+            padding: 11px 11px 15px;
             border-radius: 6px;
             background: #fee2e2;
             color: #b91c1c;
             font-size: 14px;
             line-height: 1.5;
+        }
+
+        .message-progress {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 3px;
+            background: currentColor;
+            opacity: 0.35;
+            transform-origin: left;
+            animation: messageCountdown 5s linear forwards;
+        }
+
+        @keyframes messageCountdown {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
+
+        .messages.message-hide {
+            animation: messageFadeOut 0.4s ease forwards;
+        }
+
+        @keyframes messageFadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+                max-height: 200px;
+                margin-bottom: 10px;
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-5px);
+                max-height: 0;
+                margin-bottom: 0;
+                padding-top: 0;
+                padding-bottom: 0;
+                border-width: 0;
+            }
         }
 
         .links {
@@ -177,19 +257,55 @@
 
 <body>
     <main class="container">
+
         <h1 class="brand">MahaServe</h1>
         <p class="subtitle">Create your resident account</p>
 
         {% if messages %}
-            {% for message in messages %}
-                <div class="messages">{{ message }}</div>
-            {% endfor %}
+            <div class="messages-container" aria-live="polite">
+                {% for message in messages %}
+                    <div class="messages">
+                        {{ message }}
+                        <div class="message-progress" aria-hidden="true"></div>
+                    </div>
+                {% endfor %}
+            </div>
         {% endif %}
 
         <form method="post">
             {% csrf_token %}
 
             <h3 class="section-title">Account Information</h3>
+
+            <div class="form-row">
+                <div>
+                    <label for="first_name">First Name *</label>
+                    <input
+                        type="text"
+                        id="first_name"
+                        name="first_name"
+                        maxlength="150"
+                        autocomplete="given-name"
+                        placeholder="Enter your first name"
+                        value="{{ request.POST.first_name|default:'' }}"
+                        required
+                    >
+                </div>
+
+                <div>
+                    <label for="last_name">Last Name *</label>
+                    <input
+                        type="text"
+                        id="last_name"
+                        name="last_name"
+                        maxlength="150"
+                        autocomplete="family-name"
+                        placeholder="Enter your last name"
+                        value="{{ request.POST.last_name|default:'' }}"
+                        required
+                    >
+                </div>
+            </div>
 
             <label for="username">Username *</label>
             <input
@@ -199,6 +315,7 @@
                 maxlength="150"
                 autocomplete="username"
                 placeholder="Enter a username"
+                value="{{ request.POST.username|default:'' }}"
                 required
             >
 
@@ -209,45 +326,64 @@
                 name="email"
                 autocomplete="email"
                 placeholder="Enter your email"
+                value="{{ request.POST.email|default:'' }}"
                 required
             >
 
             <div class="form-row">
                 <div>
                     <label for="password">Password *</label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        minlength="8"
-                        autocomplete="new-password"
-                        placeholder="At least 8 characters"
-                        required
-                    >
+                    <div class="password-wrapper">
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            minlength="8"
+                            autocomplete="new-password"
+                            placeholder="At least 8 characters"
+                            required
+                        >
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            data-target="password"
+                            aria-controls="password"
+                            aria-pressed="false"
+                        >Show</button>
+                    </div>
                 </div>
 
                 <div>
                     <label for="confirm_password">Confirm Password *</label>
-                    <input
-                        type="password"
-                        id="confirm_password"
-                        name="confirm_password"
-                        minlength="8"
-                        autocomplete="new-password"
-                        placeholder="Confirm password"
-                        required
-                    >
+                    <div class="password-wrapper">
+                        <input
+                            type="password"
+                            id="confirm_password"
+                            name="confirm_password"
+                            minlength="8"
+                            autocomplete="new-password"
+                            placeholder="Confirm password"
+                            required
+                        >
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            data-target="confirm_password"
+                            aria-controls="confirm_password"
+                            aria-pressed="false"
+                        >Show</button>
+                    </div>
                 </div>
             </div>
 
             <h3 class="section-title">Resident Information</h3>
 
             <p class="section-description">
-                These details are optional. You can complete your
-                profile later.
+                Please provide your complete resident information.
+                All fields are required.
             </p>
 
-            <label for="contact_number">Contact Number</label>
+            <label for="contact_number">Contact Number *</label>
             <input
                 type="tel"
                 id="contact_number"
@@ -255,22 +391,26 @@
                 maxlength="20"
                 autocomplete="tel"
                 placeholder="e.g. 09XXXXXXXXX"
+                value="{{ request.POST.contact_number|default:'' }}"
+                required
             >
 
             <div class="form-row">
                 <div>
-                    <label for="house_number">House Number</label>
+                    <label for="house_number">House Number *</label>
                     <input
                         type="text"
                         id="house_number"
                         name="house_number"
                         maxlength="100"
                         placeholder="House or lot number"
+                        value="{{ request.POST.house_number|default:'' }}"
+                        required
                     >
                 </div>
 
                 <div>
-                    <label for="street">Street</label>
+                    <label for="street">Street *</label>
                     <input
                         type="text"
                         id="street"
@@ -278,38 +418,42 @@
                         maxlength="150"
                         autocomplete="address-line1"
                         placeholder="Street name"
+                        value="{{ request.POST.street|default:'' }}"
+                        required
                     >
                 </div>
             </div>
 
-            <label for="purok">Purok</label>
+            <label for="purok">Purok *</label>
             <input
                 type="text"
                 id="purok"
                 name="purok"
                 maxlength="100"
                 placeholder="Enter your purok"
+                value="{{ request.POST.purok|default:'' }}"
+                required
             >
 
             <div class="form-row">
                 <div>
-                    <label for="date_of_birth">Date of Birth</label>
+                    <label for="date_of_birth">Date of Birth *</label>
                     <input
                         type="date"
                         id="date_of_birth"
                         name="date_of_birth"
+                        value="{{ request.POST.date_of_birth|default:'' }}"
+                        required
                     >
                 </div>
 
                 <div>
-                    <label for="sex">Sex</label>
-                    <select id="sex" name="sex">
+                    <label for="sex">Sex *</label>
+                    <select id="sex" name="sex" required>
                         <option value="">Select an option</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="prefer_not_to_say">
-                            Prefer not to say
-                        </option>
+                        <option value="male" {% if request.POST.sex == "male" %}selected{% endif %}>Male</option>
+                        <option value="female" {% if request.POST.sex == "female" %}selected{% endif %}>Female</option>
+                        <option value="prefer_not_to_say" {% if request.POST.sex == "prefer_not_to_say" %}selected{% endif %}>Prefer not to say</option>
                     </select>
                 </div>
             </div>
@@ -325,6 +469,38 @@
         <a class="back" href="{% url 'landing' %}">
             Back to landing page
         </a>
+
     </main>
+
+    <script>
+        // Show/hide password fields independently.
+        document.querySelectorAll(".password-toggle").forEach(function (button) {
+            button.addEventListener("click", function () {
+                const input = document.getElementById(button.dataset.target);
+                const showPassword = input.type === "password";
+
+                input.type = showPassword ? "text" : "password";
+                button.textContent = showPassword ? "Hide" : "Show";
+                button.setAttribute("aria-pressed", String(showPassword));
+            });
+        });
+
+        // Hide messages after 5 seconds.
+        document.addEventListener("DOMContentLoaded", function () {
+            const messages = document.querySelectorAll(
+                ".messages-container .messages"
+            );
+
+            messages.forEach(function (message) {
+                setTimeout(function () {
+                    message.classList.add("message-hide");
+
+                    setTimeout(function () {
+                        message.remove();
+                    }, 400);
+                }, 5000);
+            });
+        });
+    </script>
 </body>
 </html>
